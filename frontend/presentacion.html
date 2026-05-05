@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayLogic | Portafolio Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.5s ease-in forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        html { scroll-behavior: smooth; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen flex overflow-hidden font-sans text-slate-800 relative">
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex shadow-2xl z-20">
+        <div class="h-16 flex items-center px-6 border-b border-slate-700 shrink-0">
+            <i class="fa-solid fa-bolt text-blue-400 text-xl mr-3"></i>
+            <h1 class="text-xl font-bold tracking-wider">PayLogic<span class="text-blue-400">.</span></h1>
+        </div>
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="#" class="flex items-center px-4 py-3 bg-blue-600 text-white rounded-lg shadow-md transition-all">
+                <i class="fa-solid fa-folder-open mr-3"></i> Portafolio Técnico
+            </a>
+            <a href="index.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all">
+                <i class="fa-solid fa-code mr-3"></i> Compilador Live
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-700">
+            <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-slate-600 flex items-center justify-center text-sm font-bold">URL</div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden bg-slate-100 relative">
+        <header class="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
+            <h2 class="text-lg font-semibold text-slate-700"><i class="fa-solid fa-project-diagram text-blue-500 mr-2"></i> Documentación del Proyecto de Compiladores</h2>
+            <div class="flex items-center space-x-2 text-sm font-bold text-slate-400">
+                <span id="step-counter" class="bg-slate-100 px-3 py-1 rounded-full border border-slate-200 shadow-sm">Paso 1 de 7</span>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-auto p-4 md:p-8 flex items-center justify-center hide-scroll">
+            <div class="max-w-5xl w-full pb-10">
+
+                <!-- PASO 1: PORTADA -->
+                <div id="step-0" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 text-center fade-in block">
+                    <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner floating">
+                        <i class="fa-solid fa-bolt text-4xl text-blue-500"></i>
+                    </div>
+                    <h1 class="text-3xl md:text-4xl font-black text-slate-800 mb-2">Motor de Compilación PayLogic</h1>
+                    <p class="text-slate-500 font-bold mb-6">Proyecto Final de Compiladores</p>
+                    
+                    <div class="bg-slate-50 rounded-xl p-6 border border-slate-100 mb-8 text-left text-slate-600 hover:shadow-md transition-shadow">
+                        <h3 class="font-bold text-slate-800 mb-2"><i class="fa-solid fa-circle-info text-blue-500 mr-2"></i> Propósito del Proyecto</h3>
+                        <p><strong>PayLogic</strong> es un Lenguaje de Dominio Específico (DSL). Su propósito es automatizar, validar y ejecutar de forma segura cálculos financieros de nómina. Este portafolio técnico evidencia la construcción modular de sus fases: Léxico, Sintáctico, Semántico, y Generación.</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                        <div class="bg-white rounded-xl p-6 border border-slate-200 shadow-sm h-full hover:shadow-lg transition-shadow">
+                            <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 mb-4"><i class="fa-solid fa-code-branch mr-2"></i> Desarrolladores</h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center text-slate-700 text-sm font-medium"><i class="fa-solid fa-user text-blue-500 mr-3"></i> Pavel Danilo Montenegro Estrada</li>
+                                <li class="flex items-center text-slate-700 text-sm font-medium"><i class="fa-solid fa-user text-blue-500 mr-3"></i> Miguel Rene Montenegro Soto</li>
+                                <li class="flex items-center text-slate-700 text-sm font-medium"><i class="fa-solid fa-user text-blue-500 mr-3"></i> Josue André Menéndez Juárez</li>
+                                <li class="flex items-center text-slate-700 text-sm font-medium"><i class="fa-solid fa-user text-blue-500 mr-3"></i> Fátima María José Tzoc Monroy</li>
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 rounded-xl p-6 border border-blue-100 shadow-sm flex flex-col justify-center hover:shadow-lg transition-shadow">
+                            <h3 class="text-sm font-bold text-blue-400 uppercase tracking-widest border-b border-blue-200 pb-2 mb-4"><i class="fa-solid fa-chalkboard-user mr-2"></i> Catedrático Asesor</h3>
+                            <div class="flex items-center mt-2">
+                                <div class="w-12 h-12 rounded-full bg-blue-500 text-white flex items-center justify-center mr-4 shadow-md"><i class="fa-solid fa-graduation-cap text-xl"></i></div>
+                                <div>
+                                    <p class="font-bold text-slate-800">Ing. Jorge Estuardo Tello Monzón</p>
+                                    <p class="text-sm text-blue-600 font-medium">Curso de Compiladores</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 2: MANUAL INTERACTIVO (COMO PROGRAMAR) -->
+                <div id="step-1" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 fade-in hidden">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center shadow-inner mr-4 floating">
+                            <i class="fa-solid fa-book-open text-3xl text-sky-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-sky-500 uppercase tracking-widest">Manual del Programador</h4>
+                            <h2 class="text-3xl font-black text-slate-800">¿Cómo programar en PayLogic?</h2>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-6 text-lg">Haz clic en los botones para descubrir la sintaxis y aprender a estructurar tu código.</p>
+                    
+                    <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <div class="flex flex-wrap gap-2 mb-4 border-b border-slate-200 pb-4">
+                            <button onclick="verRegla('est')" class="bg-sky-100 text-sky-700 px-4 py-2 rounded-full text-sm font-bold hover:bg-sky-200 transition-colors shadow">Estructura Base</button>
+                            <button onclick="verRegla('var')" class="bg-purple-100 text-purple-700 px-4 py-2 rounded-full text-sm font-bold hover:bg-purple-200 transition-colors shadow">Variables</button>
+                            <button onclick="verRegla('cond')" class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full text-sm font-bold hover:bg-emerald-200 transition-colors shadow">Condicionales</button>
+                            <button onclick="verRegla('op')" class="bg-rose-100 text-rose-700 px-4 py-2 rounded-full text-sm font-bold hover:bg-rose-200 transition-colors shadow">Operadores</button>
+                        </div>
+                        <div id="rule-desc" class="text-slate-600 mb-3 font-medium">Todo programa requiere obligatoriamente un bloque INICIO y FIN.</div>
+                        <pre id="rule-code" class="bg-slate-900 text-sky-300 p-4 rounded text-sm font-mono shadow-inner">INICIO
+  // Aquí va la lógica principal
+FIN</pre>
+                    </div>
+                </div>
+
+                <!-- PASO 3: LÍNEA DE TIEMPO LÉXICA -->
+                <div id="step-2" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 fade-in hidden">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center shadow-inner mr-4 floating">
+                            <i class="fa-solid fa-radar text-3xl text-purple-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-purple-500 uppercase tracking-widest">Fase 1</h4>
+                            <h2 class="text-3xl font-black text-slate-800">Analizador Léxico</h2>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-6">El compilador avanza carácter por carácter agrupándolos en <strong>Tokens</strong>. Presiona "Avanzar" para simular cómo el escáner arma la tabla en memoria.</p>
+                    
+                    <div class="bg-slate-900 rounded-xl p-6 border border-slate-700 shadow-xl w-full">
+                        <h3 class="text-white font-bold mb-4 text-center">Simulador de Escáner</h3>
+                        
+                        <!-- Código -->
+                        <div class="text-2xl font-mono text-center tracking-[0.5em] text-slate-500 bg-slate-800 py-4 rounded-lg mb-6 shadow-inner" id="codigo-timeline">
+                            <span id="char0">V</span><span id="char1">A</span><span id="char2">R</span><span id="char3">&nbsp;</span><span id="char4">b</span><span id="char5">o</span><span id="char6">n</span><span id="char7">o</span><span id="char8">&nbsp;</span><span id="char9">=</span><span id="char10">&nbsp;</span><span id="char11">5</span><span id="char12">0</span><span id="char13">0</span><span id="char14">;</span>
+                        </div>
+
+                        <div class="flex justify-center gap-4 mb-6">
+                            <button onclick="simularLexico(-1)" class="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded shadow transition-colors"><i class="fa-solid fa-backward-step"></i> Retroceder</button>
+                            <button onclick="simularLexico(1)" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded shadow transition-colors font-bold"><i class="fa-solid fa-forward-step"></i> Avanzar Paso</button>
+                        </div>
+
+                        <!-- Tabla interactiva -->
+                        <div class="bg-slate-100 rounded p-4 h-48 overflow-auto font-mono text-sm text-slate-700 shadow-inner border border-slate-300">
+                            <table class="w-full text-left border-collapse">
+                                <thead><tr class="text-slate-400 border-b border-slate-300"><th>Lexema Detectado</th><th>Token Asignado</th></tr></thead>
+                                <tbody id="tabla-timeline">
+                                    <tr class="text-slate-400 italic"><td>--</td><td>Esperando inicio de escáner...</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 4: FASE SINTÁCTICA -->
+                <div id="step-3" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 fade-in hidden">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center shadow-inner mr-4 floating">
+                            <i class="fa-solid fa-network-wired text-3xl text-indigo-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-indigo-500 uppercase tracking-widest">Fase 2</h4>
+                            <h2 class="text-3xl font-black text-slate-800">Sintaxis y Árbol (AST)</h2>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-6 text-lg">Validamos que los tokens tengan sentido gramatical (BNF). Presiona el botón para animar la construcción del árbol que el compilador arma en memoria (JSON).</p>
+                    
+                    <div class="bg-indigo-50 rounded-xl p-6 border border-indigo-100 flex flex-col justify-center items-center shadow-inner text-center">
+                        <button onclick="animarASTPres()" class="mb-6 bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2 rounded-full font-bold shadow-lg transition-transform hover:scale-105">
+                            <i class="fa-solid fa-sitemap mr-2"></i> Construir Árbol Muestra
+                        </button>
+                        
+                        <!-- Árbol Oculto por defecto -->
+                        <div class="flex flex-col items-center">
+                            <div class="bg-white px-4 py-2 border border-indigo-200 rounded shadow font-bold text-indigo-700 ast-p-node opacity-0 scale-75 transition-all duration-500">Raíz: Programa</div>
+                            <div class="h-6 border-l-2 border-indigo-300 ast-p-node opacity-0"></div>
+                            <div class="flex gap-8">
+                                <div class="flex flex-col items-center">
+                                    <div class="bg-white px-3 py-1 border border-indigo-200 rounded shadow text-slate-600 ast-p-node opacity-0 scale-75 transition-all duration-500 delay-100">Declaraciones</div>
+                                    <div class="h-6 border-l-2 border-indigo-300 ast-p-node opacity-0 delay-100"></div>
+                                    <div class="bg-white px-3 py-1 border border-indigo-200 rounded shadow text-slate-500 font-mono ast-p-node opacity-0 scale-75 transition-all duration-500 delay-200">VAR x</div>
+                                </div>
+                                <div class="flex flex-col items-center">
+                                    <div class="bg-white px-3 py-1 border border-indigo-200 rounded shadow text-slate-600 ast-p-node opacity-0 scale-75 transition-all duration-500 delay-300">Lógica Principal</div>
+                                    <div class="h-6 border-l-2 border-indigo-300 ast-p-node opacity-0 delay-300"></div>
+                                    <div class="bg-white px-3 py-1 border border-indigo-200 rounded shadow text-slate-500 font-mono ast-p-node opacity-0 scale-75 transition-all duration-500 delay-400">x = 10</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 5: FASE SEMÁNTICA (SIMULADOR DE ERROR) -->
+                <div id="step-4" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 fade-in hidden">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center shadow-inner mr-4 floating">
+                            <i class="fa-solid fa-microchip text-3xl text-emerald-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-emerald-500 uppercase tracking-widest">Fase 3 y 4</h4>
+                            <h2 class="text-3xl font-black text-slate-800">Semántica Interactiva</h2>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-6 text-lg">El intérprete protege a la empresa contra fraudes o variables fantasma creando una <strong>Tabla de Símbolos en RAM</strong>. Inyecta un error para ver cómo el sistema frena el proceso.</p>
+                    
+                    <div class="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden flex flex-col">
+                        <div class="bg-slate-100 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
+                            <div class="font-bold text-slate-600 uppercase tracking-wide"><i class="fa-solid fa-server mr-2"></i> Memoria RAM</div>
+                            <button onclick="inyectarErrorSemantico()" class="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1 font-bold rounded shadow hover:scale-105 transition-all"><i class="fa-solid fa-bug mr-1"></i> Inyectar Saldo Negativo</button>
+                        </div>
+                        <div class="p-6 text-sm font-mono text-slate-600 overflow-auto bg-slate-50">
+                            <table class="w-full text-left">
+                                <thead class="text-slate-400 border-b border-slate-200"><tr><th>Variable</th><th>Tipo</th><th>Valor</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr><td class="py-3">salario_base</td><td class="py-3"><span class="bg-blue-100 text-blue-700 px-2 rounded">Numero</span></td><td class="py-3 font-bold text-slate-700">4000</td></tr>
+                                    <tr id="fila-dinamica" class="transition-colors duration-500"><td class="py-3">total_pagar</td><td class="py-3"><span class="bg-blue-100 text-blue-700 px-2 rounded">Numero</span></td><td class="py-3 font-bold text-emerald-600" id="valor-dinamico">4000</td></tr>
+                                </tbody>
+                            </table>
+                            
+                            <!-- Alerta de Error Oculta -->
+                            <div id="alerta-error" class="mt-4 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded hidden items-center shadow-inner">
+                                <i class="fa-solid fa-triangle-exclamation text-2xl mr-3"></i>
+                                <div>
+                                    <strong class="block font-bold">EXCEPCIÓN SEMÁNTICA (Error 06)</strong>
+                                    <span>Regla de Negocio Rota: El saldo no puede ser negativo (-500). Abortando.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASO 6: GENERACIÓN Y CIERRE -->
+                <div id="step-5" class="bg-white p-8 md:p-10 rounded-2xl shadow-xl border border-slate-200 fade-in hidden">
+                    <div class="flex items-center mb-6">
+                        <div class="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center shadow-inner mr-4 floating">
+                            <i class="fa-solid fa-receipt text-3xl text-amber-600"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-amber-500 uppercase tracking-widest">Fase 5</h4>
+                            <h2 class="text-3xl font-black text-slate-800">Dashboard y Live Demo</h2>
+                        </div>
+                    </div>
+                    <p class="text-slate-600 mb-8 text-lg">La fase final traduce el éxito del motor a un <strong>Recibo de Pago Visual</strong> interactivo. Todo el código del motor está empaquetado y listo para correr.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 text-center hover:shadow-lg transition-all h-full flex flex-col justify-center">
+                            <i class="fa-brands fa-github text-5xl text-slate-700 mb-4"></i>
+                            <h3 class="font-bold text-slate-800 mb-2">Repositorio del Proyecto</h3>
+                            <p class="text-sm text-slate-500 mb-4">Código fuente en GitHub (Node.js/Express, Vanilla JS, TailwindCSS).</p>
+                            <a href="#" class="inline-block bg-slate-800 text-white text-sm font-bold px-6 py-3 rounded-lg shadow hover:bg-slate-700 transition-colors mx-auto"><i class="fa-solid fa-code-branch mr-2"></i> Ver Repositorio</a>
+                        </div>
+                        
+                        <div class="bg-amber-50 p-6 rounded-xl border border-amber-200 flex flex-col justify-center items-center text-center shadow-inner h-full hover:bg-amber-100 transition-colors">
+                            <h3 class="font-bold text-amber-800 mb-4 text-xl">¿Listos para la Magia?</h3>
+                            <p class="text-sm text-amber-700 mb-6">Ve al compilador para probar todo el flujo, desde el escáner hasta el confeti de aprobación.</p>
+                            <a href="index.html" class="bg-amber-500 hover:bg-amber-600 text-white font-black py-4 px-8 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                                Iniciar Live Demo <i class="fa-solid fa-play ml-3 text-xl"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- CONTROLES INFERIORES -->
+        <footer class="h-20 bg-white border-t border-slate-200 flex items-center justify-between px-6 md:px-10 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-10 shrink-0">
+            <button id="btn-prev" onclick="cambiarPaso(-1)" class="px-4 py-2 text-slate-500 font-bold hover:text-slate-800 transition-colors invisible">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Regresar
+            </button>
+            
+            <button id="btn-next" onclick="cambiarPaso(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl shadow-md transition-all flex items-center hover:scale-105">
+                Siguiente <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+            
+            <a id="btn-start" href="index.html" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-xl shadow-md transition-all items-center hover:scale-105 hidden">
+                Ir al Compilador <i class="fa-solid fa-arrow-right-to-bracket ml-2"></i>
+            </a>
+        </footer>
+    </main>
+
+    <script>
+        let pasoActual = 0;
+        const totalPasos = 6;
+
+        function cambiarPaso(direccion) {
+            document.getElementById(`step-${pasoActual}`).classList.remove('block');
+            document.getElementById(`step-${pasoActual}`).classList.add('hidden');
+            pasoActual += direccion;
+            document.getElementById(`step-${pasoActual}`).classList.remove('hidden');
+            document.getElementById(`step-${pasoActual}`).classList.add('block');
+            document.getElementById('step-counter').innerText = `Paso ${pasoActual + 1} de ${totalPasos}`;
+
+            const btnPrev = document.getElementById('btn-prev');
+            const btnNext = document.getElementById('btn-next');
+            const btnStart = document.getElementById('btn-start');
+
+            if (pasoActual === 0) btnPrev.classList.add('invisible');
+            else btnPrev.classList.remove('invisible');
+
+            if (pasoActual === totalPasos - 1) {
+                btnNext.classList.add('hidden');
+                btnStart.classList.remove('hidden'); btnStart.classList.add('flex');
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } }); // Confeti al llegar al final
+            } else {
+                btnNext.classList.remove('hidden');
+                btnStart.classList.add('hidden'); btnStart.classList.remove('flex');
+            }
+        }
+
+        // --- INTERACTIVIDAD MANUAL DE PROGRAMACIÓN (PASO 2) ---
+        const reglas = {
+            'est': { desc: 'Todo programa requiere obligatoriamente un bloque INICIO y FIN.', code: 'INICIO\n  // Aquí va la lógica principal\nFIN' },
+            'var': { desc: 'Las variables se declaran antes del INICIO. Deben iniciar con letra.', code: 'VAR salario_base = 3000;\nVAR bono;\nCONST isr = 0.05;' },
+            'cond': { desc: 'Usa SI y ENTONCES para decisiones. Se cierra con FIN SI.', code: 'SI ventas > 100 ENTONCES\n  bono = 1000;\nSINO\n  bono = 0;\nFIN SI;' },
+            'op': { desc: 'Finaliza todo con punto y coma (;). Operadores: +, -, *, /', code: 'total_pagar = salario_base + bono;\nimpuesto = total_pagar * isr;' }
+        };
+        function verRegla(tipo) {
+            document.getElementById('rule-desc').innerText = reglas[tipo].desc;
+            document.getElementById('rule-code').innerText = reglas[tipo].code;
+        }
+
+        // --- INTERACTIVIDAD LÍNEA DE TIEMPO LÉXICA (PASO 3) ---
+        let lexPos = -1;
+        const lexData = [
+            { chars: [0,1,2], lex: "VAR", tok: "PALABRA_RESERVADA", col: "text-blue-500" },
+            { chars: [4,5,6,7], lex: "bono", tok: "IDENTIFICADOR", col: "text-purple-500" },
+            { chars: [9], lex: "=", tok: "OP_ASIGNACION", col: "text-rose-500" },
+            { chars: [11,12,13], lex: "500", tok: "NUMERO", col: "text-amber-500" },
+            { chars: [14], lex: ";", tok: "PUNTO_Y_COMA", col: "text-slate-500" }
+        ];
+
+        function simularLexico(dir) {
+            if (dir === 1 && lexPos < lexData.length - 1) lexPos++;
+            else if (dir === -1 && lexPos >= 0) lexPos--;
+            else return;
+
+            for(let i=0; i<=14; i++) document.getElementById(`char${i}`).className = "text-slate-500 transition-colors";
+            
+            let tablaHTML = "";
+            for(let i=0; i<=lexPos; i++) {
+                let current = lexData[i];
+                current.chars.forEach(idx => { document.getElementById(`char${idx}`).className = `${current.col} font-bold transition-colors shadow-glow`; });
+                tablaHTML += `<tr class="border-b border-slate-200"><td class="py-2 ${current.col} font-bold">${current.lex}</td><td class="py-2 font-bold text-slate-600">${current.tok}</td></tr>`;
+            }
+            if(lexPos === -1) tablaHTML = '<tr class="text-slate-400 italic"><td>--</td><td>Esperando inicio de escáner...</td></tr>';
+            document.getElementById('tabla-timeline').innerHTML = tablaHTML;
+        }
+
+        // --- INTERACTIVIDAD ANIMACIÓN AST (PASO 4) ---
+        function animarASTPres() {
+            const nodos = document.querySelectorAll('.ast-p-node');
+            nodos.forEach((nodo, i) => {
+                setTimeout(() => {
+                    nodo.classList.remove('opacity-0', 'scale-75');
+                    nodo.classList.add('opacity-100', 'scale-100');
+                }, i * 300);
+            });
+        }
+
+        // --- INTERACTIVIDAD ERROR SEMÁNTICO (PASO 5) ---
+        function inyectarErrorSemantico() {
+            const fila = document.getElementById('fila-dinamica');
+            const val = document.getElementById('valor-dinamico');
+            const alerta = document.getElementById('alerta-error');
+            
+            fila.classList.add('bg-red-50');
+            val.classList.replace('text-emerald-600', 'text-red-600');
+            val.innerText = "-500";
+            
+            alerta.classList.remove('hidden');
+            alerta.classList.add('flex', 'fade-in');
+        }
+    </script>
+</body>
+</html>
