@@ -44,6 +44,11 @@
         .animate-flow { position: absolute; animation: flow-animation 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
         .fade-in-slow { animation: fadeInSlow 1s ease-in forwards; }
         @keyframes fadeInSlow { from { opacity: 0; } to { opacity: 1; } }
+        
+        /* Loading para el botón */
+        .loader-bar { width: 100%; height: 4px; background: #e2e8f0; overflow: hidden; border-radius: 2px; }
+        .loader-bar::after { content: ''; display: block; width: 40%; height: 100%; background: #10b981; animation: loading 1s infinite ease-in-out; }
+        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
     </style>
 </head>
 <body class="bg-slate-50 h-screen flex overflow-hidden font-sans text-slate-800 relative">
@@ -147,20 +152,25 @@
     </main>
 
     <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative">
-            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-slate-200">
-                <i class="fa-solid fa-fingerprint text-4xl text-slate-700"></i>
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative border-t-8 border-emerald-600">
+            <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-slate-200">
+                <i class="fa-solid fa-lock text-3xl text-slate-700"></i>
             </div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2">Firma Electrónica</h2>
-            <p class="text-slate-500 mb-6 text-sm">Ingrese la credencial de administrador para autorizar la dispersión de los fondos calculados.</p>
+            <h2 class="text-2xl font-black text-slate-800 mb-1">Autorización Bancaria</h2>
+            <p class="text-slate-500 mb-6 text-sm">Verificación requerida para conectarse con la red y desembolsar los fondos.</p>
 
-            <input type="password" id="input-password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-xl rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-2.5 py-3 mb-1 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
-            <p id="error-password" class="text-red-500 text-xs font-bold h-4 mb-4 opacity-0 transition-opacity">Credencial incorrecta. Acceso denegado.</p>
+            <div class="text-left mb-4">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Token / Contraseña Segura:</label>
+                <input type="password" id="input-password" class="mt-1 w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-xl rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-4 py-3 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
+            </div>
+            
+            <p id="error-password" class="text-red-500 text-xs font-bold h-4 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial rechazada.</p>
+            <div id="loading-password" class="hidden mb-4"><div class="loader-bar"></div><p class="text-xs text-slate-500 mt-2 font-bold">Verificando en base de datos...</p></div>
 
-            <div class="flex gap-3 mt-2">
+            <div class="flex gap-3 mt-4" id="botones-seguridad">
                 <button onclick="cerrarModalSeguridad()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition-colors">Cancelar</button>
                 <button onclick="verificarFirma()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-transform hover:scale-105 flex justify-center items-center">
-                    <i class="fa-solid fa-key mr-2"></i> Firmar
+                    <i class="fa-solid fa-fingerprint mr-2"></i> Procesar
                 </button>
             </div>
         </div>
@@ -176,7 +186,7 @@
         </div>
     </div>
 
-    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-10 w-[800px]"></div>
+    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-0 w-[800px]"></div>
 
     <script>
         let graficaActual = null;
@@ -643,11 +653,13 @@
         function abrirModalSeguridad() {
             document.getElementById('input-password').value = '';
             document.getElementById('error-password').classList.add('opacity-0');
+            document.getElementById('loading-password').classList.add('hidden');
+            document.getElementById('botones-seguridad').classList.remove('hidden');
+            
             const modal = document.getElementById('modal-seguridad');
             modal.classList.remove('hidden');
             setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
             
-            // Que la tecla Enter funcione también para aprobar
             document.getElementById('input-password').focus();
             document.getElementById('input-password').onkeydown = function(e){
                 if(e.key === 'Enter') verificarFirma();
@@ -664,91 +676,185 @@
             const input = document.getElementById('input-password').value;
             const errorText = document.getElementById('error-password');
             
-            if (input === 'peppers') {
-                errorText.classList.add('opacity-0');
-                cerrarModalSeguridad();
-                aprobarNominaReal();
-            } else {
-                errorText.classList.remove('opacity-0');
-                document.getElementById('input-password').value = '';
-            }
+            errorText.classList.add('opacity-0');
+            document.getElementById('botones-seguridad').classList.add('hidden');
+            document.getElementById('loading-password').classList.remove('hidden');
+            
+            setTimeout(() => {
+                if (input === 'peppers') {
+                    cerrarModalSeguridad();
+                    setTimeout(aprobarNominaReal, 400); // Dar tiempo a que cierre el modal anterior
+                } else {
+                    document.getElementById('loading-password').classList.add('hidden');
+                    document.getElementById('botones-seguridad').classList.remove('hidden');
+                    errorText.classList.remove('opacity-0');
+                    document.getElementById('input-password').value = '';
+                    document.getElementById('input-password').focus();
+                }
+            }, 1200); // 1.2 segundos simulando verificación en base de datos
         }
 
         function aprobarNominaReal() {
             const btn = document.getElementById('btn-aprobar');
-            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-3"></i> Procesando Firma...';
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-3"></i> Encriptando transacción...';
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
 
             setTimeout(() => {
-                btn.innerHTML = '<i class="fa-solid fa-check mr-3"></i> Aprobado Oficialmente';
+                btn.innerHTML = '<i class="fa-solid fa-check-double mr-3"></i> Fondos Desembolsados';
                 btn.classList.replace('bg-emerald-600', 'bg-slate-600');
                 btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-700');
                 
                 let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 
-                mostrarModal('Sello de Auditoría Aprobado', `Firma validada exitosamente. Se enviará una transferencia exacta de Q. ${total} a la cuenta vinculada del destinatario. El expediente ha sido cerrado de manera oficial.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Aceptar <i class="fa-solid fa-check-double ml-2"></i>', 'cerrarModal()');
+                mostrarModal('Aprobación Exitosa', `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total} a la cuenta vinculada del empleado PAVEL DANILO MONTENEGRO ESTRADA.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Cerrar Expediente <i class="fa-solid fa-lock ml-2"></i>', 'cerrarModal()');
             }, 1500);
         }
 
-        // ==================== FUNCION DESCARGAR PDF ERP ====================
+        // ==================== FUNCION DESCARGAR PDF TIPO BANCO INDUSTRIAL ====================
         function descargarPDF() {
+            let fechaActual = new Date();
+            let mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+            let año = fechaActual.getFullYear();
+            let fechaStr = fechaActual.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
             let htmlReporte = `
-                <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
-                    <div style="border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
-                        <div>
-                            <h1 style="color: #1e293b; margin: 0; font-size: 28px;">Reporte PayLogic ERP</h1>
-                            <p style="color: #64748b; margin: 5px 0 0 0;">Auditoría de Nómina Automatizada</p>
-                        </div>
-                        <div style="text-align: right;">
-                            <p style="margin: 0; font-weight: bold; color: #0f172a;">Fecha: ${new Date().toLocaleDateString()}</p>
-                            <p style="margin: 5px 0 0 0; color: #64748b;">Ref: PYLGC-00${Math.floor(Math.random() * 9999)}</p>
-                        </div>
+                <div style="font-family: Arial, sans-serif; font-size: 12px; color: #000; width: 800px; padding: 20px; box-sizing: border-box; background: white;">
+                    <div style="background-color: #003876; color: white; padding: 4px 10px; font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+                        Consulta personalizada - Estado de Cuenta PayLogic
                     </div>
-                    
-                    <h3 style="color: #334155; margin-bottom: 15px;">Resumen de Variables Calculadas</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid #00a4e4; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; color: #003876; font-style: italic; margin-right: 15px;">PL</div>
+                        <div style="font-size: 28px; font-weight: 900; color: #000; font-style: italic; letter-spacing: -1px; line-height: 1;">MOTOR<br>PAYLOGIC</div>
+                    </div>
+                    <div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">
+                        MOTOR DE COMPILACIÓN PAYLOGIC, S.A. Quetzaltenango, Guatemala C.A. PBX: 2420-3000
+                    </div>
+
+                    <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 2px; font-weight: bold; text-transform: uppercase;">
+                        PAVEL DANILO MONTENEGRO ESTRADA
+                    </div>
+                    <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 15px; text-align: right; font-style: italic; font-size: 11px;">
+                        Numero de cuenta: <span style="font-weight: bold; font-style: normal;">0510009324</span> Correspondiente al mes de: <span style="font-weight: bold; font-style: normal;">${mes} ${año}</span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; font-size: 11px;">
                         <thead>
-                            <tr style="background-color: #f1f5f9; color: #475569; text-align: left;">
-                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1;">Identificador</th>
-                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1;">Categoría</th>
-                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1; text-align: right;">Monto (Q)</th>
+                            <tr style="border-bottom: 2px solid #000;">
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 10%;">Día</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 10%;">Docto.</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 40%;">Descripción</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 12%;">Débito</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 12%;">Crédito</th>
+                                <th style="padding: 4px; width: 16%;">Saldo</th>
                             </tr>
                         </thead>
                         <tbody>
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">****SALDO ANTERIOR****</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="padding: 2px 4px; text-align: right;">0.00</td>
+                            </tr>
             `;
 
-            let total = 0;
+            let saldo = 0;
+            let totalDebito = 0;
+            let totalCredito = 0;
+            let documentBase = 141690;
+
             for(let key in memoriaRAMGlobal) {
+                if(key.includes("total") || key.includes("salario_final")) continue; 
+
                 let v = memoriaRAMGlobal[key];
+                let valorNum = parseFloat(v.valor);
+                if (isNaN(valorNum) || valorNum === 0) continue;
+
+                let isDebito = key.toLowerCase().includes("descuento") || key.toLowerCase().includes("impuesto") || key.toLowerCase().includes("deduccion");
+                let debitoStr = "";
+                let creditoStr = "";
+
+                if (isDebito) {
+                    debitoStr = valorNum.toFixed(2);
+                    totalDebito += valorNum;
+                    saldo -= valorNum;
+                } else {
+                    creditoStr = valorNum.toFixed(2);
+                    totalCredito += valorNum;
+                    saldo += valorNum;
+                }
+
+                documentBase += Math.floor(Math.random() * 10) + 1;
+                let desc = key.replace(/_/g, ' ').toUpperCase();
+
                 htmlReporte += `
-                    <tr>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #334155;">${key}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #64748b;">${v.categoria}</td>
-                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace;">${parseFloat(v.valor).toFixed(2)}</td>
-                    </tr>
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${documentBase}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">REGISTRO DE ${desc}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;">${debitoStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;">${creditoStr}</td>
+                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
+                            </tr>
                 `;
-                if(key.includes("total") || key.includes("salario_final") || key.includes("saldo_inicial")) total = v.valor;
+            }
+
+            htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">321009</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">PLANILLA ${mes.toUpperCase()} ${año}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
+                            </tr>
+            `;
+
+            for(let i=0; i<4; i++){
+                htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="padding: 8px 4px;"></td>
+                            </tr>
+                `;
             }
 
             htmlReporte += `
                         </tbody>
                     </table>
-                    <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid #a7f3d0;">
-                        <p style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Monto Final Aprobado</p>
-                        <h2 style="margin: 10px 0 0 0; color: #047857; font-size: 36px;">Q. ${parseFloat(total).toFixed(2)}</h2>
-                    </div>
-                    <div style="margin-top: 50px; font-size: 12px; color: #94a3b8; text-align: center;">
-                        Documento generado automáticamente por el Motor de Compilación PayLogic.<br>
-                        Proyecto Universitario de Compiladores.
-                    </div>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
+                        <tr>
+                            <td style="width: 60%; padding: 5px; font-size: 8px; color: #333; text-transform: uppercase;">
+                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL MOTOR PAYLOGIC NO EXTIENDE DUPLICADOS.
+                            </td>
+                            <td style="width: 10%; font-weight: bold; text-align: right; padding-right: 10px;">
+                                Totales:
+                            </td>
+                            <td style="width: 30%;">
+                                <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; border-top: none;">
+                                    <tr>
+                                        <td style="border-right: 1px solid #000; padding: 6px 4px; text-align: right; width: 33%; font-weight: bold;">${totalDebito.toFixed(2)}</td>
+                                        <td style="border-right: 1px solid #000; padding: 6px 4px; text-align: right; width: 33%; font-weight: bold;">${totalCredito.toFixed(2)}</td>
+                                        <td style="padding: 6px 4px; text-align: right; width: 34%; font-weight: bold;">${saldo.toFixed(2)}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
                 </div>
             `;
 
             const opt = {
-                margin:       0.5,
-                filename:     'Reporte_Auditoria_PayLogic.pdf',
+                margin:       0.2,
+                filename:     'Estado_Cuenta_PayLogic.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
