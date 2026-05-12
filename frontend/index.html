@@ -8,6 +8,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         .perspective-1000 { perspective: 1000px; }
         .preserve-3d { transform-style: preserve-3d; }
@@ -16,6 +17,7 @@
         .shadow-glow-red { text-shadow: 0 0 8px rgba(220, 38, 38, 0.8); }
         .bloque-activo { transform: scale(1.02); z-index: 10; position: relative; }
         
+        /* MAGIA CSS PARA EL ÁRBOL SINTÁCTICO */
         .ast-tree * { margin: 0; padding: 0; box-sizing: border-box; }
         .ast-tree ul { padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; }
         .ast-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; }
@@ -154,12 +156,16 @@
         </div>
     </div>
 
+    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-10 w-[800px]">
+        </div>
+
     <script>
         let graficaActual = null;
         let resultadoSintacticoGlobal = null;
         let memoriaRAMGlobal = {}; 
         let codigoRawFase2 = "";
 
+        // ==================== UTILIDADES ====================
         function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
             document.getElementById('modal-icon').className = `fa-solid ${icono} text-4xl ${colorIcono}`;
             document.getElementById('modal-icon-bg').className = `w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ${bgIcono}`;
@@ -281,7 +287,6 @@
             await pause(400); 
             pintarBloque(lineas.map((l, i) => /\b(INICIO|FIN)\b/.test(l) && !/\b(FUNCION|SI)\b/.test(l) ? i : -1).filter(i => i !== -1), 'bg-blue-600', 'text-white', 'fa-cube', '1. Evaluando Regla <Programa>'); await pause(800);
             pintarBloque(lineas.map((l, i) => /\b(VAR|CONST)\b/.test(l) ? i : -1).filter(i => i !== -1), 'bg-purple-600', 'text-white', 'fa-list-ol', '2. Evaluando Reglas <Declaraciones>'); await pause(800);
-            
             let idxCond = lineas.map((l, i) => (/(SI|ENTONCES|SINO|FIN SI|=|[-+*\/])/.test(l) && !/(VAR|CONST)/.test(l)) ? i : -1).filter(i => i !== -1);
             pintarBloque(idxCond, 'bg-emerald-600', 'text-white', 'fa-code-branch', '3. Evaluando Lógica y Asignaciones'); await pause(800);
 
@@ -504,16 +509,16 @@
             if (resultadoSemantico.exito) {
                 document.getElementById('texto-barra-fases').innerHTML = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i> Ejecución Finalizada.';
                 const btnFase = document.getElementById('btn-accion-fase');
-                btnFase.innerHTML = 'Emitir Recibo de Pago <i class="fa-solid fa-money-check-dollar ml-2"></i>';
+                btnFase.innerHTML = 'Generar Salida Final <i class="fa-solid fa-money-check-dollar ml-2"></i>';
                 btnFase.onclick = function(){ simularEjecucionVisual(); }; 
                 document.getElementById('barra-control-fases').classList.remove('hidden');
                 setTimeout(() => { btnFase.onclick(); }, 1000);
             } else {
-                setTimeout(() => { mostrarModal('Error de Ejecución', 'El motor detectó una falla matemática o lógica. Revisa la consola.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar Error <i class="fa-solid fa-xmark ml-2"></i>', 'cerrarModal()'); }, 1000);
+                setTimeout(() => { mostrarModal('Error de Ejecución', 'Falla matemática o lógica. Revisa la consola.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar Error <i class="fa-solid fa-xmark ml-2"></i>', 'cerrarModal()'); }, 1000);
             }
         }
 
-        // ==================== FASE 4: ANIMACIÓN Y APROBACIÓN (CONFETI) ====================
+        // ==================== FASE 4: ANIMACIÓN Y PDF ====================
         function simularEjecucionVisual() {
             cerrarModal();
             document.getElementById('barra-control-fases').classList.add('hidden');
@@ -522,7 +527,6 @@
             
             bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-slate-50 rounded-xl shadow-2xl border-t-8 border-amber-500 flex flex-col overflow-hidden transition-colors duration-500";
             
-            // INTELIGENCIA DE CONTEXTO
             let contextoLlaves = Object.keys(memoriaRAMGlobal).join(" ").toLowerCase();
             let esVentas = contextoLlaves.includes("venta") || contextoLlaves.includes("comision") || contextoLlaves.includes("bono");
             
@@ -597,30 +601,106 @@
                 <div class="text-center mb-8">
                     <div class="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner"><i class="fa-solid fa-file-invoice-dollar text-4xl text-amber-500"></i></div>
                     <h2 class="text-3xl font-bold text-slate-800">Nómina Procesada Correctamente</h2>
-                    <p class="text-slate-500 mt-2">Los montos están listos para ser asignados.</p>
+                    <p class="text-slate-500 mt-2">Los montos están listos para ser asignados o exportados como reporte PDF.</p>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
                     ${tarjetasHTML}
                 </div>
-                <div class="mt-10 flex justify-center gap-6">
-                    <button onclick="aprobarNomina()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-10 rounded-xl shadow-2xl transition-all flex items-center hover:scale-105">
-                        <i class="fa-solid fa-file-signature mr-3"></i> Aprobar y Asignar
+                <div class="mt-10 flex justify-center gap-4">
+                    <button onclick="aprobarNomina()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                        <i class="fa-solid fa-file-signature mr-2"></i> Aprobar
                     </button>
-                    <button onclick="regresarEditor()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-10 rounded-xl shadow-2xl transition-all flex items-center hover:scale-105">
-                        <i class="fa-solid fa-rotate-left mr-3"></i> Nuevo Cálculo
+                    <button onclick="descargarPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                        <i class="fa-solid fa-file-pdf mr-2"></i> PDF Informe
+                    </button>
+                    <button onclick="regresarEditor()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Nuevo
                     </button>
                 </div>
             `;
         }
 
-        // FUNCION PARA BOTON APROBAR Y ASIGNAR CON CONFETI
+        // --- FUNCION APROBAR ---
         function aprobarNomina() {
             let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
-            
-            // Disparar Confeti WOW
             confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-            
             mostrarModal('¡Aprobado y Asignado!', `El valor final de Q. ${total} ha sido asignado a la cuenta del empleado de forma exitosa.`, 'fa-check-double', 'text-emerald-500', 'bg-emerald-100', 'Entendido <i class="fa-solid fa-thumbs-up ml-2"></i>', 'cerrarModal()');
+        }
+
+        // --- FUNCION DESCARGAR PDF (ESTILO ERP INVOICE) ---
+        function descargarPDF() {
+            // Construimos una plantilla de factura "bien chilera" invisible
+            let htmlReporte = `
+                <div id="invoice-template" style="padding: 40px; font-family: Arial, sans-serif; color: #333;">
+                    <div style="border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <h1 style="color: #1e293b; margin: 0; font-size: 28px;">Reporte PayLogic ERP</h1>
+                            <p style="color: #64748b; margin: 5px 0 0 0;">Auditoría de Nómina Automatizada</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-weight: bold; color: #0f172a;">Fecha: ${new Date().toLocaleDateString()}</p>
+                            <p style="margin: 5px 0 0 0; color: #64748b;">Ref: PYLGC-00${Math.floor(Math.random() * 9999)}</p>
+                        </div>
+                    </div>
+                    
+                    <h3 style="color: #334155; margin-bottom: 15px;">Resumen de Variables Calculadas</h3>
+                    <table style="width: 100%; border-collapse: collapse; margin-bottom: 40px;">
+                        <thead>
+                            <tr style="background-color: #f1f5f9; color: #475569; text-align: left;">
+                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1;">Identificador</th>
+                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1;">Categoría</th>
+                                <th style="padding: 12px; border-bottom: 1px solid #cbd5e1; text-align: right;">Monto (Q)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            let total = 0;
+            for(let key in memoriaRAMGlobal) {
+                let v = memoriaRAMGlobal[key];
+                htmlReporte += `
+                    <tr>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; font-weight: bold; color: #334155;">${key}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #64748b;">${v.categoria}</td>
+                        <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace;">${parseFloat(v.valor).toFixed(2)}</td>
+                    </tr>
+                `;
+                if(key.includes("total") || key.includes("salario_final")) total = v.valor;
+            }
+
+            htmlReporte += `
+                        </tbody>
+                    </table>
+                    <div style="background-color: #ecfdf5; padding: 20px; border-radius: 8px; text-align: center; border: 1px solid #a7f3d0;">
+                        <p style="margin: 0; color: #065f46; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Monto Final Aprobado</p>
+                        <h2 style="margin: 10px 0 0 0; color: #047857; font-size: 36px;">Q. ${parseFloat(total).toFixed(2)}</h2>
+                    </div>
+                    <div style="margin-top: 50px; font-size: 12px; color: #94a3b8; text-align: center;">
+                        Documento generado automáticamente por el Motor de Compilación PayLogic.<br>
+                        Proyecto Universitario de Compiladores.
+                    </div>
+                </div>
+            `;
+
+            // Metemos el HTML al DOM temporalmente
+            const container = document.getElementById('pdf-container');
+            container.innerHTML = htmlReporte;
+            container.style.display = 'block';
+
+            // Opciones de html2pdf
+            const opt = {
+                margin:       0.5,
+                filename:     'Reporte_Auditoria_PayLogic.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            // Generar, descargar y luego ocultar el div temporal
+            html2pdf().set(opt).from(container).save().then(() => {
+                container.style.display = 'none';
+                container.innerHTML = '';
+            });
         }
 
         // ==================== FUNCIONES DE REINICIO ====================
