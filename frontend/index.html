@@ -176,7 +176,7 @@
         </div>
     </div>
 
-    <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+    <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <button onclick="cerrarModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
             <div id="modal-icon-bg" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i id="modal-icon" class=""></i></div>
@@ -193,6 +193,7 @@
         let resultadoSintacticoGlobal = null;
         let memoriaRAMGlobal = {}; 
         let codigoRawFase2 = "";
+        let nominaAprobada = false; // Variable de estado para controlar la descarga
 
         // ==================== UTILIDADES / MODALES ====================
         function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
@@ -231,6 +232,7 @@
         async function iniciarEscaner() {
             const codigoRaw = document.getElementById('codigo').value;
             codigoRawFase2 = codigoRaw; 
+            nominaAprobada = false; // Reset al iniciar un nuevo escaneo
             if (!codigoRaw.trim()) { alert("Escribe código para analizar."); return; }
             
             document.getElementById('barra-control-fases').classList.add('hidden');
@@ -547,7 +549,7 @@
             }
         }
 
-        // ==================== FASE 4: ANIMACIÓN Y PDF ====================
+        // ==================== FASE 4: ANIMACIÓN Y DASHBOARD ====================
         function simularEjecucionVisual() {
             cerrarModal();
             document.getElementById('barra-control-fases').classList.add('hidden');
@@ -599,7 +601,7 @@
                 "salario_base": "Salario Base Fijo",
                 "ventas_mes": "Total de Ventas Registradas",
                 "comision": "Tu Bono Obtenido es de",
-                "bono": "Tu Bono Obtenido es de",
+                "bono": "Bono Obtenido",
                 "total_pagar": "Total a Recibir en Cuenta",
                 "salario_final": "Total a Recibir en Cuenta",
                 "saldo_inicial": "Su saldo es de",
@@ -614,6 +616,7 @@
                 if(textoAmigable.includes("Recibir") || textoAmigable.includes("saldo") || textoAmigable.includes("Salario")) icon = "fa-sack-dollar text-emerald-500";
                 else if(textoAmigable.includes("Bono") || textoAmigable.includes("abono")) icon = "fa-hand-holding-dollar text-blue-500";
                 else if(textoAmigable.includes("Ventas") || textoAmigable.includes("Horas")) icon = "fa-chart-line text-amber-500";
+                else if(key.includes("total_pagar")) icon = "fa-sack-dollar text-emerald-500"; // Forzado por si acaso
                 
                 tarjetasHTML += `
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-md flex items-center justify-between hover:scale-105 transition-transform">
@@ -632,10 +635,10 @@
                     <h2 class="text-3xl font-bold text-slate-800">Nómina Procesada Correctamente</h2>
                     <p class="text-slate-500 mt-2">Los montos están listos para ser asignados o exportados como reporte PDF.</p>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-10">
                     ${tarjetasHTML}
                 </div>
-                <div class="mt-10 flex justify-center gap-4">
+                <div class="flex justify-center gap-4 mt-auto">
                     <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                         <i class="fa-solid fa-file-signature mr-2"></i> Autorizar y Emitir
                     </button>
@@ -683,7 +686,7 @@
             setTimeout(() => {
                 if (input === 'peppers') {
                     cerrarModalSeguridad();
-                    setTimeout(aprobarNominaReal, 400); // Dar tiempo a que cierre el modal anterior
+                    setTimeout(aprobarNominaReal, 400); 
                 } else {
                     document.getElementById('loading-password').classList.add('hidden');
                     document.getElementById('botones-seguridad').classList.remove('hidden');
@@ -691,7 +694,7 @@
                     document.getElementById('input-password').value = '';
                     document.getElementById('input-password').focus();
                 }
-            }, 1200); // 1.2 segundos simulando verificación en base de datos
+            }, 1200); 
         }
 
         function aprobarNominaReal() {
@@ -705,15 +708,22 @@
                 btn.classList.replace('bg-emerald-600', 'bg-slate-600');
                 btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-700');
                 
+                nominaAprobada = true; // <--- HABILITA EL PDF
+                
                 let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 
-                mostrarModal('Aprobación Exitosa', `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total} a la cuenta vinculada del empleado PAVEL DANILO MONTENEGRO ESTRADA.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Cerrar Expediente <i class="fa-solid fa-lock ml-2"></i>', 'cerrarModal()');
+                mostrarModal('Aprobación Exitosa', `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total} a la cuenta vinculada del EMPLEADO. El expediente ha sido cerrado de manera oficial.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Cerrar Expediente <i class="fa-solid fa-lock ml-2"></i>', 'cerrarModal()');
             }, 1500);
         }
 
-        // ==================== FUNCION DESCARGAR PDF TIPO BANCO INDUSTRIAL ====================
+        // ==================== FUNCION DESCARGAR PDF ====================
         function descargarPDF() {
+            if (!nominaAprobada) {
+                mostrarModal('Acción Denegada', 'Por políticas de seguridad, debe autorizar y emitir la nómina mediante Firma Electrónica antes de poder generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
+                return;
+            }
+
             let fechaActual = new Date();
             let mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
             let año = fechaActual.getFullYear();
@@ -734,7 +744,7 @@
                     </div>
 
                     <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 2px; font-weight: bold; text-transform: uppercase;">
-                        PAVEL DANILO MONTENEGRO ESTRADA
+                        USUARIO / EMPLEADO
                     </div>
                     <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 15px; text-align: right; font-style: italic; font-size: 11px;">
                         Numero de cuenta: <span style="font-weight: bold; font-style: normal;">0510009324</span> Correspondiente al mes de: <span style="font-weight: bold; font-style: normal;">${mes} ${año}</span>
@@ -767,6 +777,7 @@
             let totalCredito = 0;
             let documentBase = 141690;
 
+            // Extraer solo los montos base para la tabla (excluir el totalizador)
             for(let key in memoriaRAMGlobal) {
                 if(key.includes("total") || key.includes("salario_final")) continue; 
 
@@ -788,7 +799,7 @@
                     saldo += valorNum;
                 }
 
-                documentBase += Math.floor(Math.random() * 10) + 1;
+                documentBase++;
                 let desc = key.replace(/_/g, ' ').toUpperCase();
 
                 htmlReporte += `
@@ -803,17 +814,7 @@
                 `;
             }
 
-            htmlReporte += `
-                            <tr>
-                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
-                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">321009</td>
-                                <td style="border-right: 1px solid #000; padding: 2px 4px;">PLANILLA ${mes.toUpperCase()} ${año}</td>
-                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
-                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
-                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
-                            </tr>
-            `;
-
+            // Filas vacías de relleno
             for(let i=0; i<4; i++){
                 htmlReporte += `
                             <tr>
@@ -833,7 +834,7 @@
                     <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
                         <tr>
                             <td style="width: 60%; padding: 5px; font-size: 8px; color: #333; text-transform: uppercase;">
-                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL MOTOR PAYLOGIC NO EXTIENDE DUPLICADOS.
+                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL BANCO NO EXTIENDE DUPLICADOS.
                             </td>
                             <td style="width: 10%; font-weight: bold; text-align: right; padding-right: 10px;">
                                 Totales:
@@ -865,6 +866,7 @@
 
         // ==================== FUNCIONES DE REINICIO ====================
         function regresarEditor() {
+            nominaAprobada = false; // Reset al regresar
             document.getElementById('flipper-izquierdo').classList.remove('rotate-y-180');
             setTimeout(() => {
                 document.getElementById('codigo-animado').classList.add('hidden'); document.getElementById('codigo').classList.remove('hidden');
