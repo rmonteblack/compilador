@@ -17,6 +17,7 @@
         .shadow-glow-red { text-shadow: 0 0 8px rgba(220, 38, 38, 0.8); }
         .bloque-activo { transform: scale(1.02); z-index: 10; position: relative; }
         
+        /* MAGIA CSS PARA EL ÁRBOL SINTÁCTICO */
         .ast-tree * { margin: 0; padding: 0; box-sizing: border-box; }
         .ast-tree ul { padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; }
         .ast-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; }
@@ -145,15 +146,37 @@
         </div>
     </main>
 
+    <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative">
+            <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 shadow-inner border border-slate-200">
+                <i class="fa-solid fa-fingerprint text-4xl text-slate-700"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Firma Electrónica</h2>
+            <p class="text-slate-500 mb-6 text-sm">Ingrese la credencial de administrador para autorizar la dispersión de los fondos calculados.</p>
+
+            <input type="password" id="input-password" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-xl rounded-lg focus:ring-emerald-500 focus:border-emerald-500 block px-2.5 py-3 mb-1 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
+            <p id="error-password" class="text-red-500 text-xs font-bold h-4 mb-4 opacity-0 transition-opacity">Credencial incorrecta. Acceso denegado.</p>
+
+            <div class="flex gap-3 mt-2">
+                <button onclick="cerrarModalSeguridad()" class="flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold py-3 rounded-xl transition-colors">Cancelar</button>
+                <button onclick="verificarFirma()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition-transform hover:scale-105 flex justify-center items-center">
+                    <i class="fa-solid fa-key mr-2"></i> Firmar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <button onclick="cerrarModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
             <div id="modal-icon-bg" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i id="modal-icon" class=""></i></div>
             <h2 id="modal-title" class="text-2xl font-bold text-slate-800 mb-2"></h2>
-            <p id="modal-desc" class="text-slate-500 mb-8"></p>
+            <p id="modal-desc" class="text-slate-500 mb-8 leading-relaxed"></p>
             <button id="modal-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center hover:scale-105"></button>
         </div>
     </div>
+
+    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-10 w-[800px]"></div>
 
     <script>
         let graficaActual = null;
@@ -161,7 +184,7 @@
         let memoriaRAMGlobal = {}; 
         let codigoRawFase2 = "";
 
-        // ==================== UTILIDADES ====================
+        // ==================== UTILIDADES / MODALES ====================
         function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
             document.getElementById('modal-icon').className = `fa-solid ${icono} text-4xl ${colorIcono}`;
             document.getElementById('modal-icon-bg').className = `w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner ${bgIcono}`;
@@ -260,7 +283,7 @@
             } catch (e) { alert(e.message); btnAnalizar.disabled = false; btnAnalizar.innerHTML = '<i class="fa-solid fa-play mr-2"></i> Ejecutar Análisis Léxico'; }
         }
 
-        // ==================== FASE 2: SINTÁCTICO ====================
+        // ==================== FASE 2: SINTÁCTICO CON BNF ====================
         async function ejecutarFase2() {
             cerrarModal(); document.getElementById('barra-control-fases').classList.add('hidden');
             const panelDerecho = document.getElementById('panel-derecho'); panelDerecho.classList.add('opacity-0'); setTimeout(() => { panelDerecho.classList.add('hidden'); }, 500);
@@ -505,7 +528,7 @@
             if (resultadoSemantico.exito) {
                 document.getElementById('texto-barra-fases').innerHTML = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i> Ejecución Finalizada.';
                 const btnFase = document.getElementById('btn-accion-fase');
-                btnFase.innerHTML = 'Emitir Recibo de Pago <i class="fa-solid fa-money-check-dollar ml-2"></i>';
+                btnFase.innerHTML = 'Generar Salida Final <i class="fa-solid fa-money-check-dollar ml-2"></i>';
                 btnFase.onclick = function(){ simularEjecucionVisual(); }; 
                 document.getElementById('barra-control-fases').classList.remove('hidden');
                 setTimeout(() => { btnFase.onclick(); }, 1000);
@@ -603,7 +626,7 @@
                     ${tarjetasHTML}
                 </div>
                 <div class="mt-10 flex justify-center gap-4">
-                    <button id="btn-aprobar" onclick="aprobarNomina()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                    <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                         <i class="fa-solid fa-file-signature mr-2"></i> Autorizar y Emitir
                     </button>
                     <button onclick="descargarPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
@@ -616,8 +639,42 @@
             `;
         }
 
-        // --- FUNCION APROBAR MEJORADA ---
-        function aprobarNomina() {
+        // ==================== FUNCIONES DE FIRMA Y SEGURIDAD ====================
+        function abrirModalSeguridad() {
+            document.getElementById('input-password').value = '';
+            document.getElementById('error-password').classList.add('opacity-0');
+            const modal = document.getElementById('modal-seguridad');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
+            
+            // Que la tecla Enter funcione también para aprobar
+            document.getElementById('input-password').focus();
+            document.getElementById('input-password').onkeydown = function(e){
+                if(e.key === 'Enter') verificarFirma();
+            };
+        }
+
+        function cerrarModalSeguridad() {
+            const modal = document.getElementById('modal-seguridad');
+            modal.classList.add('opacity-0'); modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function verificarFirma() {
+            const input = document.getElementById('input-password').value;
+            const errorText = document.getElementById('error-password');
+            
+            if (input === 'peppers') {
+                errorText.classList.add('opacity-0');
+                cerrarModalSeguridad();
+                aprobarNominaReal();
+            } else {
+                errorText.classList.remove('opacity-0');
+                document.getElementById('input-password').value = '';
+            }
+        }
+
+        function aprobarNominaReal() {
             const btn = document.getElementById('btn-aprobar');
             btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-3"></i> Procesando Firma...';
             btn.disabled = true;
@@ -631,11 +688,11 @@
                 let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 
-                mostrarModal('Sello de Auditoría Aprobado', `La transferencia de Q. ${total} ha sido encriptada y enviada a la cuenta. El expediente está cerrado de manera oficial.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Aceptar <i class="fa-solid fa-check-double ml-2"></i>', 'cerrarModal()');
+                mostrarModal('Sello de Auditoría Aprobado', `Firma validada exitosamente. Se enviará una transferencia exacta de Q. ${total} a la cuenta vinculada del destinatario. El expediente ha sido cerrado de manera oficial.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Aceptar <i class="fa-solid fa-check-double ml-2"></i>', 'cerrarModal()');
             }, 1500);
         }
 
-        // --- FUNCION DESCARGAR PDF MEJORADA Y CORREGIDA ---
+        // ==================== FUNCION DESCARGAR PDF ERP ====================
         function descargarPDF() {
             let htmlReporte = `
                 <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
