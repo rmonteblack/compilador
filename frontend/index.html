@@ -17,7 +17,6 @@
         .shadow-glow-red { text-shadow: 0 0 8px rgba(220, 38, 38, 0.8); }
         .bloque-activo { transform: scale(1.02); z-index: 10; position: relative; }
         
-        /* MAGIA CSS PARA EL ÁRBOL SINTÁCTICO */
         .ast-tree * { margin: 0; padding: 0; box-sizing: border-box; }
         .ast-tree ul { padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; }
         .ast-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; }
@@ -156,9 +155,6 @@
         </div>
     </div>
 
-    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-10 w-[800px]">
-        </div>
-
     <script>
         let graficaActual = null;
         let resultadoSintacticoGlobal = null;
@@ -264,7 +260,7 @@
             } catch (e) { alert(e.message); btnAnalizar.disabled = false; btnAnalizar.innerHTML = '<i class="fa-solid fa-play mr-2"></i> Ejecutar Análisis Léxico'; }
         }
 
-        // ==================== FASE 2: SINTÁCTICO CON BNF ====================
+        // ==================== FASE 2: SINTÁCTICO ====================
         async function ejecutarFase2() {
             cerrarModal(); document.getElementById('barra-control-fases').classList.add('hidden');
             const panelDerecho = document.getElementById('panel-derecho'); panelDerecho.classList.add('opacity-0'); setTimeout(() => { panelDerecho.classList.add('hidden'); }, 500);
@@ -357,7 +353,7 @@
             setTimeout(() => { btnFase.onclick(); }, 800);
         }
 
-        // ==================== FASE 3: SEMÁNTICA MATEMÁTICA ====================
+        // ==================== FASE 3: SEMÁNTICA ====================
         function procesarSemantica(ast) {
             let memoria = {}; let pasosEjecucion = []; let errorGlobal = null;
             function registrar(msg, tipo = "info") { pasosEjecucion.push({ log: msg, tipo, tabla: Object.values(memoria).map(s => ({...s})) }); }
@@ -509,7 +505,7 @@
             if (resultadoSemantico.exito) {
                 document.getElementById('texto-barra-fases').innerHTML = '<i class="fa-solid fa-circle-check text-green-500 mr-2"></i> Ejecución Finalizada.';
                 const btnFase = document.getElementById('btn-accion-fase');
-                btnFase.innerHTML = 'Generar Salida Final <i class="fa-solid fa-money-check-dollar ml-2"></i>';
+                btnFase.innerHTML = 'Emitir Recibo de Pago <i class="fa-solid fa-money-check-dollar ml-2"></i>';
                 btnFase.onclick = function(){ simularEjecucionVisual(); }; 
                 document.getElementById('barra-control-fases').classList.remove('hidden');
                 setTimeout(() => { btnFase.onclick(); }, 1000);
@@ -607,8 +603,8 @@
                     ${tarjetasHTML}
                 </div>
                 <div class="mt-10 flex justify-center gap-4">
-                    <button onclick="aprobarNomina()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
-                        <i class="fa-solid fa-file-signature mr-2"></i> Aprobar
+                    <button id="btn-aprobar" onclick="aprobarNomina()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
+                        <i class="fa-solid fa-file-signature mr-2"></i> Autorizar y Emitir
                     </button>
                     <button onclick="descargarPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                         <i class="fa-solid fa-file-pdf mr-2"></i> PDF Informe
@@ -620,18 +616,29 @@
             `;
         }
 
-        // --- FUNCION APROBAR ---
+        // --- FUNCION APROBAR MEJORADA ---
         function aprobarNomina() {
-            let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
-            confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-            mostrarModal('¡Aprobado y Asignado!', `El valor final de Q. ${total} ha sido asignado a la cuenta del empleado de forma exitosa.`, 'fa-check-double', 'text-emerald-500', 'bg-emerald-100', 'Entendido <i class="fa-solid fa-thumbs-up ml-2"></i>', 'cerrarModal()');
+            const btn = document.getElementById('btn-aprobar');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-3"></i> Procesando Firma...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check mr-3"></i> Aprobado Oficialmente';
+                btn.classList.replace('bg-emerald-600', 'bg-slate-600');
+                btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-700');
+                
+                let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+                
+                mostrarModal('Sello de Auditoría Aprobado', `La transferencia de Q. ${total} ha sido encriptada y enviada a la cuenta. El expediente está cerrado de manera oficial.`, 'fa-stamp', 'text-emerald-600', 'bg-emerald-100', 'Aceptar <i class="fa-solid fa-check-double ml-2"></i>', 'cerrarModal()');
+            }, 1500);
         }
 
-        // --- FUNCION DESCARGAR PDF (ESTILO ERP INVOICE) ---
+        // --- FUNCION DESCARGAR PDF MEJORADA Y CORREGIDA ---
         function descargarPDF() {
-            // Construimos una plantilla de factura "bien chilera" invisible
             let htmlReporte = `
-                <div id="invoice-template" style="padding: 40px; font-family: Arial, sans-serif; color: #333;">
+                <div style="padding: 40px; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; color: #333; background: #fff; width: 100%; box-sizing: border-box;">
                     <div style="border-bottom: 2px solid #2563eb; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center;">
                         <div>
                             <h1 style="color: #1e293b; margin: 0; font-size: 28px;">Reporte PayLogic ERP</h1>
@@ -665,7 +672,7 @@
                         <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; text-align: right; font-family: monospace;">${parseFloat(v.valor).toFixed(2)}</td>
                     </tr>
                 `;
-                if(key.includes("total") || key.includes("salario_final")) total = v.valor;
+                if(key.includes("total") || key.includes("salario_final") || key.includes("saldo_inicial")) total = v.valor;
             }
 
             htmlReporte += `
@@ -682,25 +689,15 @@
                 </div>
             `;
 
-            // Metemos el HTML al DOM temporalmente
-            const container = document.getElementById('pdf-container');
-            container.innerHTML = htmlReporte;
-            container.style.display = 'block';
-
-            // Opciones de html2pdf
             const opt = {
                 margin:       0.5,
                 filename:     'Reporte_Auditoria_PayLogic.pdf',
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
                 jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
             };
 
-            // Generar, descargar y luego ocultar el div temporal
-            html2pdf().set(opt).from(container).save().then(() => {
-                container.style.display = 'none';
-                container.innerHTML = '';
-            });
+            html2pdf().set(opt).from(htmlReporte).save();
         }
 
         // ==================== FUNCIONES DE REINICIO ====================
