@@ -193,7 +193,7 @@
         let resultadoSintacticoGlobal = null;
         let memoriaRAMGlobal = {}; 
         let codigoRawFase2 = "";
-        let nominaAprobada = false; // Variable de estado para controlar la descarga
+        let nominaAprobada = false; 
 
         // ==================== UTILIDADES / MODALES ====================
         function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
@@ -232,7 +232,7 @@
         async function iniciarEscaner() {
             const codigoRaw = document.getElementById('codigo').value;
             codigoRawFase2 = codigoRaw; 
-            nominaAprobada = false; // Reset al iniciar un nuevo escaneo
+            nominaAprobada = false; 
             if (!codigoRaw.trim()) { alert("Escribe código para analizar."); return; }
             
             document.getElementById('barra-control-fases').classList.add('hidden');
@@ -616,7 +616,7 @@
                 if(textoAmigable.includes("Recibir") || textoAmigable.includes("saldo") || textoAmigable.includes("Salario")) icon = "fa-sack-dollar text-emerald-500";
                 else if(textoAmigable.includes("Bono") || textoAmigable.includes("abono")) icon = "fa-hand-holding-dollar text-blue-500";
                 else if(textoAmigable.includes("Ventas") || textoAmigable.includes("Horas")) icon = "fa-chart-line text-amber-500";
-                else if(key.includes("total_pagar")) icon = "fa-sack-dollar text-emerald-500"; // Forzado por si acaso
+                else if(key.includes("total_pagar")) icon = "fa-sack-dollar text-emerald-500"; 
                 
                 tarjetasHTML += `
                     <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-md flex items-center justify-between hover:scale-105 transition-transform">
@@ -642,8 +642,8 @@
                     <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                         <i class="fa-solid fa-file-signature mr-2"></i> Autorizar y Emitir
                     </button>
-                    <button onclick="descargarPDF()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
-                        <i class="fa-solid fa-file-pdf mr-2"></i> PDF Informe
+                    <button id="btn-pdf" onclick="descargarPDF()" class="bg-slate-300 text-slate-500 font-bold py-3 px-6 rounded-xl shadow transition-all flex items-center cursor-not-allowed">
+                        <i class="fa-solid fa-lock mr-2" id="icon-pdf"></i> PDF Informe
                     </button>
                     <button onclick="regresarEditor()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-6 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                         <i class="fa-solid fa-rotate-left mr-2"></i> Nuevo
@@ -708,7 +708,16 @@
                 btn.classList.replace('bg-emerald-600', 'bg-slate-600');
                 btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-700');
                 
-                nominaAprobada = true; // <--- HABILITA EL PDF
+                nominaAprobada = true; // HABILITA EL PDF
+                
+                // Efecto visual desbloquear PDF
+                const btnPdf = document.getElementById('btn-pdf');
+                btnPdf.classList.replace('bg-slate-300', 'bg-blue-600');
+                btnPdf.classList.replace('text-slate-500', 'text-white');
+                btnPdf.classList.replace('cursor-not-allowed', 'hover:bg-blue-700');
+                btnPdf.classList.replace('shadow', 'shadow-lg');
+                btnPdf.classList.add('hover:scale-105');
+                document.getElementById('icon-pdf').className = "fa-solid fa-file-pdf mr-2";
                 
                 let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
@@ -717,7 +726,7 @@
             }, 1500);
         }
 
-        // ==================== FUNCION DESCARGAR PDF ====================
+        // ==================== FUNCION DESCARGAR PDF TIPO BANCO INDUSTRIAL ====================
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Por políticas de seguridad, debe autorizar y emitir la nómina mediante Firma Electrónica antes de poder generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
@@ -777,30 +786,35 @@
             let totalCredito = 0;
             let documentBase = 141690;
 
-            // Extraer solo los montos base para la tabla (excluir el totalizador)
+            // Filtramos estrictamente las variables de dinero. Ignoramos métricas y los totalizadores.
             for(let key in memoriaRAMGlobal) {
-                if(key.includes("total") || key.includes("salario_final")) continue; 
+                if(key.includes("total") || key.includes("salario_final") || key.includes("ventas") || key.includes("horas")) continue; 
 
                 let v = memoriaRAMGlobal[key];
                 let valorNum = parseFloat(v.valor);
-                if (isNaN(valorNum) || valorNum === 0) continue;
+                if (isNaN(valorNum)) continue;
 
                 let isDebito = key.toLowerCase().includes("descuento") || key.toLowerCase().includes("impuesto") || key.toLowerCase().includes("deduccion");
                 let debitoStr = "";
                 let creditoStr = "";
-
-                if (isDebito) {
-                    debitoStr = valorNum.toFixed(2);
-                    totalDebito += valorNum;
-                    saldo -= valorNum;
-                } else {
-                    creditoStr = valorNum.toFixed(2);
-                    totalCredito += valorNum;
-                    saldo += valorNum;
-                }
+                let desc = key.replace(/_/g, ' ').toUpperCase();
 
                 documentBase++;
-                let desc = key.replace(/_/g, ' ').toUpperCase();
+
+                if (valorNum === 0) {
+                    desc = desc + " (NO RECIBIDO)";
+                    creditoStr = "0.00";
+                } else {
+                    if (isDebito) {
+                        debitoStr = valorNum.toFixed(2);
+                        totalDebito += valorNum;
+                        saldo -= valorNum;
+                    } else {
+                        creditoStr = valorNum.toFixed(2);
+                        totalCredito += valorNum;
+                        saldo += valorNum;
+                    }
+                }
 
                 htmlReporte += `
                             <tr>
@@ -814,7 +828,17 @@
                 `;
             }
 
-            // Filas vacías de relleno
+            htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">321009</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">PLANILLA ${mes.toUpperCase()} ${año}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
+                            </tr>
+            `;
+
             for(let i=0; i<4; i++){
                 htmlReporte += `
                             <tr>
@@ -834,7 +858,7 @@
                     <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
                         <tr>
                             <td style="width: 60%; padding: 5px; font-size: 8px; color: #333; text-transform: uppercase;">
-                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL BANCO NO EXTIENDE DUPLICADOS.
+                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL MOTOR PAYLOGIC NO EXTIENDE DUPLICADOS.
                             </td>
                             <td style="width: 10%; font-weight: bold; text-align: right; padding-right: 10px;">
                                 Totales:
