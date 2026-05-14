@@ -48,11 +48,11 @@
             display: none; 
         }
 
-        /* DISEÑO DE BLOQUES DRAG AND DROP (TIPO SCRATCH) */
+        /* DISEÑO DE BLOQUES DRAG AND DROP */
         .pill {
             display: inline-flex;
             align-items: center;
-            padding: 0.35rem 1rem;
+            padding: 0.4rem 1rem;
             border-radius: 9999px;
             font-weight: 900;
             font-size: 0.875rem;
@@ -73,13 +73,13 @@
         .pill-num { background-color: #f59e0b; } /* Naranja: Números */
         .pill-op { background-color: #8b5cf6; }  /* Morado: Operadores (+ - * /) */
         .pill-comp { background-color: #ec4899; } /* Rosa: Comparadores (> < ==) */
-        .pill-assign { background-color: #0ea5e9; } /* Celeste: Signo Igual (=) */
+        .pill-assign { background-color: #0ea5e9; } /* Celeste: Asignaciones (= > <) */
         
         /* ZONAS PARA SOLTAR (DROPZONES) */
         .dropzone {
             display: inline-flex;
             min-width: 90px;
-            height: 38px;
+            height: 40px;
             border: 2px dashed #cbd5e1;
             border-radius: 9999px;
             align-items: center;
@@ -163,14 +163,6 @@
                 <i class="fa-solid fa-plug w-6 text-center mr-2"></i> Implementación
             </a>
         </nav>
-        <div class="p-6 border-t border-slate-700 bg-slate-950">
-            <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-black shadow-inner">UMG</div>
-                <div class="ml-3">
-                    <p class="text-sm font-bold text-white">Ing. en Sistemas</p>
-                </div>
-            </div>
-        </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -214,14 +206,15 @@
                         <div id="palette-vars" class="flex flex-wrap gap-2 mb-3 min-h-[30px]">
                             <span class="text-xs text-slate-400 italic">No hay variables aún.</span>
                         </div>
-                        <div id="palette-nums" class="flex flex-wrap gap-2 min-h-[30px]">
-                            </div>
+                        <div id="palette-nums" class="flex flex-wrap gap-2 min-h-[30px]"></div>
                     </div>
 
                     <div class="mb-6">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Asignación</span>
                         <div class="flex flex-wrap gap-2">
                             <div class="pill pill-assign" draggable="true" ondragstart="drag(event)" data-val="=" data-type="assign">Igual (=)</div>
+                            <div class="pill pill-assign" draggable="true" ondragstart="drag(event)" data-val=">" data-type="assign">Mayor que (&gt;)</div>
+                            <div class="pill pill-assign" draggable="true" ondragstart="drag(event)" data-val="<" data-type="assign">Menor que (&lt;)</div>
                         </div>
                     </div>
 
@@ -271,7 +264,7 @@
                         <div class="text-center text-slate-400 font-bold mt-20" id="canvas-empty">
                             <i class="fa-solid fa-arrow-pointer text-6xl mb-4 text-slate-300"></i>
                             <p class="text-xl text-slate-500 mb-2">El lienzo está vacío.</p>
-                            <p class="text-sm font-medium">1. Crea tus variables a la izquierda.<br>2. Añade una plantilla usando los botones de arriba.<br>3. Arrastra las pastillas hacia los huecos de la plantilla.</p>
+                            <p class="text-sm font-medium">1. Crea tus variables a la izquierda.<br>2. Añade una plantilla usando los botones de arriba.<br>3. Arrastra las pastillas hacia los huecos.</p>
                         </div>
                         
                     </div>
@@ -282,7 +275,7 @@
             <div id="vista-cargando" class="hidden flex-1 flex-col items-center justify-center p-10 bg-white z-50 absolute inset-0">
                 <div class="w-32 h-32 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-10 shadow-lg"></div>
                 <h2 class="text-4xl font-black text-slate-800 mb-4">Procesando Lógica Visual</h2>
-                <p class="text-slate-500 font-bold text-xl mb-12">Traduciendo rompecabezas a código y evaluando memoria...</p>
+                <p class="text-slate-500 font-bold text-xl mb-12">Traduciendo rompecabezas a código e inyectando en el motor...</p>
                 <div class="w-80"><div class="loader-bar"></div></div>
             </div>
 
@@ -356,7 +349,7 @@
     </div>
 
     <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-lg w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-3xl"></i></button>
             <div id="modal-icon-bg" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i id="modal-icon" class=""></i></div>
             <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-4"></h2>
@@ -372,7 +365,7 @@
         let memoriaRAMGlobal = {}; 
         let nominaAprobada = false;
 
-        // Función auxiliar para escapar el HTML en el Javascript y que no se rompa el "<" y ">"
+        // Función para escapar el HTML (< y >) y evitar que se rompan las tarjetas
         function escapeHTML(str) {
             if (!str) return '';
             return String(str).replace(/[&<>'"]/g, tag => ({ 
@@ -395,7 +388,6 @@
             }
             
             visualVars.push({ name: nameInput, value: valInput || 0 });
-            
             document.getElementById('var-name').value = '';
             document.getElementById('var-val').value = '';
             
@@ -407,6 +399,7 @@
             if (val === '') return;
             
             const container = document.getElementById('palette-nums');
+            // Las pastillas son infinitas porque el usuario puede crearlas y arrastrarlas cuantas veces quiera.
             container.innerHTML += `<div class="pill pill-num" draggable="true" ondragstart="drag(event)" data-val="${val}" data-type="num">${val}</div>`;
             document.getElementById('num-val').value = '';
         }
@@ -444,6 +437,7 @@
                 ev.currentTarget.classList.add('drag-over');
             }
         }
+        
         function leaveDrop(ev) {
             ev.currentTarget.classList.remove('drag-over');
         }
@@ -456,9 +450,9 @@
             let type = ev.dataTransfer.getData("type");
             let color = ev.dataTransfer.getData("color");
             
-            let reqType = el.getAttribute('data-req'); // 'var_num', 'op', 'comp', 'var', 'assign'
+            let reqType = el.getAttribute('data-req');
             
-            // Validaciones estrictas
+            // Validaciones Estrictas para mantener la gramática de PayLogic intacta
             if(reqType === 'var' && type !== 'var') { 
                 mostrarModal('Pieza Incorrecta', 'En este hueco solo puedes colocar una Variable (Bloque Azul).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
                 return; 
@@ -476,12 +470,13 @@
                 return; 
             }
             if(reqType === 'assign' && type !== 'assign') { 
-                mostrarModal('Falta Signo Igual', 'En esta zona debes colocar el símbolo de Asignación (=) para que la instrucción tenga sentido.', 'fa-equals', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                mostrarModal('Falta Signo de Asignación', 'En esta zona debes colocar el símbolo de Asignación (=, >, <) para que la instrucción tenga sentido.', 'fa-equals', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
                 return; 
             }
 
-            // Llenar el Dropzone escapando el HTML para no romper los símbolos < y >
+            // Escapamos el valor para renderizar > o < correctamente sin romper el div HTML
             let displayVal = escapeHTML(val);
+            
             el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer hover:scale-95" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${displayVal}</div>`;
             el.setAttribute('data-filled', val);
             el.classList.add('filled');
@@ -503,13 +498,9 @@
                 <button onclick="this.parentElement.remove()" class="absolute -top-3 -right-3 w-8 h-8 bg-white border border-slate-200 text-red-500 rounded-full flex items-center justify-center font-bold shadow-md hover:bg-red-500 hover:text-white transition-colors z-10"><i class="fa-solid fa-trash-can text-sm"></i></button>
                 
                 <div class="dropzone dz-res" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
-                
                 <div class="dropzone dropzone-assign dz-assign" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
-                
                 <div class="dropzone dz-v1" data-req="var_num" data-label="Valor 1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 1</div>
-                
                 <div class="dropzone dropzone-op dz-op" data-req="op" data-label="Op" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Op</div>
-                
                 <div class="dropzone dz-v2" data-req="var_num" data-label="Valor 2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 2</div>
             `;
             area.appendChild(row);
@@ -525,35 +516,36 @@
                 
                 <div class="flex items-center flex-wrap gap-3 mb-3 w-full">
                     <span class="badge-logic badge-si">SI</span>
-                    <div class="dropzone dz-cv1" data-req="var_num" data-label="Var / Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var / Num</div>
+                    <div class="dropzone dz-cv1" data-req="var_num" data-label="Var/Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var/Num</div>
                     <div class="dropzone dropzone-comp dz-comp" data-req="comp" data-label="Cond" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Cond</div>
-                    <div class="dropzone dz-cv2" data-req="var_num" data-label="Var / Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var / Num</div>
+                    <div class="dropzone dz-cv2" data-req="var_num" data-label="Var/Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var/Num</div>
                 </div>
                 
                 <div class="flex items-center flex-wrap gap-3 mb-3 pl-6 md:pl-10 border-l-4 border-blue-200 ml-4 w-full">
                     <span class="badge-logic badge-entonces">ENTONCES</span>
                     <div class="dropzone dz-tv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
                     <div class="dropzone dropzone-assign dz-assign-t" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
-                    <div class="dropzone dz-tval" data-req="var_num" data-label="Valor Final" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor Final</div>
+                    <div class="dropzone dz-tval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
                 </div>
 
                 <div class="flex items-center flex-wrap gap-3 pl-6 md:pl-10 border-l-4 border-slate-200 ml-4 w-full opacity-90">
                     <span class="badge-logic badge-sino">SINO</span>
                     <div class="dropzone dz-fv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
                     <div class="dropzone dropzone-assign dz-assign-f" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
-                    <div class="dropzone dz-fval" data-req="var_num" data-label="Valor Final" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor Final</div>
+                    <div class="dropzone dz-fval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
                 </div>
             `;
             area.appendChild(row);
         }
 
-        // ==================== 4. PROCESADOR NO-CODE A CÓDIGO ====================
+        // ==================== 4. PROCESADOR NO-CODE (Traductor a AST y Ejecución) ====================
         function procesarNoCode() {
             if (visualVars.length === 0) {
                 mostrarModal('Faltan Variables', 'Debes crear e inyectar al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
                 return;
             }
 
+            // ARMADO DE CÓDIGO
             let code = "";
             visualVars.forEach(v => {
                 code += `VAR ${v.name} = ${v.value};\n`;
@@ -602,18 +594,17 @@
                 return;
             }
 
-            // Cambiar a vista cargando
             document.getElementById('vista-lienzo').classList.add('hidden');
             document.getElementById('vista-cargando').classList.remove('hidden');
             document.getElementById('vista-cargando').classList.add('flex', 'fade-in');
 
-            // Intérprete JS local para procesar el código resultante
+            // Envío a Intérprete Local en Background
             setTimeout(() => {
                 ejecutarSilenciosoLocal(code);
             }, 2500);
         }
 
-        // Intérprete JavaScript para Procesar lo que armó el usuario
+        // Intérprete JS local para ejecutar la estructura armada
         function ejecutarSilenciosoLocal(codigo) {
             memoriaRAMGlobal = {};
             try {
@@ -625,7 +616,7 @@
                     let trim = l.trim();
                     if (!trim || trim === 'INICIO' || trim === 'FIN') return;
 
-                    // 1. Declaraciones
+                    // 1. Declaraciones Iniciales
                     if (trim.startsWith('VAR')) {
                         let parts = trim.replace('VAR', '').replace(';', '').split('=');
                         let name = parts[0].trim();
@@ -658,16 +649,19 @@
                     else if (trim.startsWith('FIN SI')) {
                         inIf = false;
                     }
-                    // 3. Asignación u Operación Matemática
+                    // 3. Asignaciones y Matemáticas
                     else {
                         if (inIf && !ifConditionTrue) return; 
                         
                         let clean = trim.replace(';', '');
-                        let assignSplit = clean.split('=');
-                        if (assignSplit.length !== 2) return;
                         
-                        let target = assignSplit[0].trim();
-                        let expr = assignSplit[1].trim();
+                        // Detectamos dinámicamente si arrastraron =, > o < en la zona de asignación
+                        let matchAssign = clean.match(/^\s*([a-zA-Z0-9_]+)\s*(=|>|<|>=|<=|==)\s*(.*)$/);
+                        if (!matchAssign) return;
+                        
+                        let target = matchAssign[1].trim();
+                        let opAssign = matchAssign[2].trim();
+                        let expr = matchAssign[3].trim();
                         
                         let opMatch = expr.match(/([\w\d_]+)\s*([\+\-\*\/])\s*([\w\d_]+)/);
                         if (opMatch) {
@@ -684,6 +678,7 @@
                             if(opStr === '*') res = n1 * n2;
                             if(opStr === '/') res = n1 / n2;
                             
+                            // Realiza la asignación sin importar qué símbolo de asignación hayan arrastrado
                             memoriaRAMGlobal[target].valor = res;
                         } else {
                             let n1 = isNaN(expr) ? parseFloat(memoriaRAMGlobal[expr].valor) : parseFloat(expr);
@@ -692,7 +687,6 @@
                     }
                 });
 
-                // Transición a la pantalla de Resultados
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 
@@ -706,11 +700,37 @@
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 document.getElementById('vista-lienzo').classList.remove('hidden');
-                mostrarModal('Error de Lógica', 'La lógica contiene errores. Revisa que todas las variables utilizadas hayan sido creadas y arrastradas correctamente.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Error de Lógica', 'El motor ha encontrado un error. Asegúrate de que los bloques estén en el orden correcto.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
             }
         }
 
-        // ==================== DASHBOARD FINAL ====================
+        // Funciones auxiliares de UI (Modales)
+        function mostrarModal(title, desc, icon, iconColor, iconBg, btnText, btnAction) {
+            document.getElementById('modal-title').innerText = title;
+            document.getElementById('modal-desc').innerText = desc;
+            
+            const iconEl = document.getElementById('modal-icon');
+            iconEl.className = `fa-solid ${icon} text-5xl ${iconColor}`;
+            
+            const iconBgEl = document.getElementById('modal-icon-bg');
+            iconBgEl.className = `w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ${iconBg}`;
+            
+            const btnEl = document.getElementById('modal-btn');
+            btnEl.innerHTML = btnText;
+            btnEl.setAttribute('onclick', btnAction);
+            
+            const modal = document.getElementById('modal-fase-completada');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
+        }
+        
+        function cerrarModal() {
+            const modal = document.getElementById('modal-fase-completada');
+            modal.classList.add('opacity-0'); modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // ==================== 5. RESULTADOS Y PDF CORPORATIVO ====================
         function generarTarjetasResultados() {
             const contenedor = document.getElementById('contenedor-tarjetas');
             let tarjetasHTML = '';
@@ -761,7 +781,6 @@
             btnAprobar.className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center";
         }
 
-        // ==================== SEGURIDAD Y FIRMA ====================
         function abrirModalSeguridad() {
             document.getElementById('input-password').value = '';
             document.getElementById('error-password').classList.add('opacity-0');
@@ -838,7 +857,6 @@
             }, 1500);
         }
 
-        // Generar PDF corporativo
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Debe autorizar la nómina mediante Firma Electrónica antes de generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
