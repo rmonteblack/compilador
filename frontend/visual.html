@@ -11,48 +11,75 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
     <style>
-        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        .fade-in { 
+            animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; 
+        }
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(20px); } 
             to { opacity: 1; transform: translateY(0); } 
         }
         
-        .loader-bar { width: 100%; height: 6px; background: #e2e8f0; overflow: hidden; border-radius: 3px; }
-        .loader-bar::after { content: ''; display: block; width: 40%; height: 100%; background: #10b981; animation: loading 1s infinite ease-in-out; }
-        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+        .loader-bar { 
+            width: 100%; 
+            height: 6px; 
+            background: #e2e8f0; 
+            overflow: hidden; 
+            border-radius: 3px; 
+        }
+        .loader-bar::after { 
+            content: ''; 
+            display: block; 
+            width: 40%; 
+            height: 100%; 
+            background: #10b981; 
+            animation: loading 1s infinite ease-in-out; 
+        }
+        @keyframes loading { 
+            0% { transform: translateX(-100%); } 
+            100% { transform: translateX(300%); } 
+        }
 
         .bg-pattern {
             background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
             background-size: 24px 24px;
         }
         
-        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll::-webkit-scrollbar { 
+            display: none; 
+        }
 
-        /* Estilos DRAG AND DROP */
+        /* DISEÑO DE BLOQUES DRAG AND DROP (TIPO SCRATCH) */
         .pill {
             display: inline-flex;
             align-items: center;
-            padding: 0.25rem 0.75rem;
+            padding: 0.35rem 1rem;
             border-radius: 9999px;
-            font-weight: 800;
+            font-weight: 900;
             font-size: 0.875rem;
             color: white;
             cursor: grab;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
             user-select: none;
-            transition: transform 0.1s;
+            transition: transform 0.1s, box-shadow 0.1s;
         }
-        .pill:active { cursor: grabbing; transform: scale(0.95); }
+        .pill:active { 
+            cursor: grabbing; 
+            transform: scale(0.95); 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1); 
+        }
         
-        .pill-var { background-color: #3b82f6; }
-        .pill-num { background-color: #f59e0b; }
-        .pill-op { background-color: #8b5cf6; }
-        .pill-comp { background-color: #ec4899; }
+        /* Colores de las piezas */
+        .pill-var { background-color: #3b82f6; } /* Azul: Variables */
+        .pill-num { background-color: #f59e0b; } /* Naranja: Números */
+        .pill-op { background-color: #8b5cf6; }  /* Morado: Operadores (+ - * /) */
+        .pill-comp { background-color: #ec4899; } /* Rosa: Comparadores (> < ==) */
+        .pill-assign { background-color: #0ea5e9; } /* Celeste: Signo Igual (=) */
         
+        /* ZONAS PARA SOLTAR (DROPZONES) */
         .dropzone {
             display: inline-flex;
-            min-width: 80px;
-            height: 36px;
+            min-width: 90px;
+            height: 38px;
             border: 2px dashed #cbd5e1;
             border-radius: 9999px;
             align-items: center;
@@ -60,16 +87,20 @@
             background-color: #f8fafc;
             color: #94a3b8;
             font-size: 0.75rem;
-            font-weight: bold;
+            font-weight: 800;
             text-transform: uppercase;
             transition: all 0.2s;
             margin: 0 0.25rem;
             vertical-align: middle;
         }
+        .dropzone-assign, .dropzone-op, .dropzone-comp {
+            min-width: 50px; /* Zonas más pequeñas para símbolos */
+        }
         .dropzone.drag-over {
             background-color: #e0f2fe;
             border-color: #3b82f6;
             border-style: solid;
+            transform: scale(1.05);
         }
         .dropzone.filled {
             border: none;
@@ -78,18 +109,37 @@
             padding: 0;
         }
         
+        /* FILAS DEL LIENZO */
         .logic-row {
             background: white;
             border: 1px solid #e2e8f0;
-            border-radius: 1rem;
-            padding: 1rem 1.5rem;
-            margin-bottom: 1rem;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            border-radius: 1.25rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             gap: 0.5rem;
+            transition: border-color 0.3s;
         }
+        .logic-row:hover {
+            border-color: #cbd5e1;
+        }
+        
+        /* ETIQUETAS FIJAS DEL LIENZO */
+        .badge-logic {
+            font-weight: 900;
+            color: white;
+            padding: 0.4rem 1.2rem;
+            border-radius: 0.75rem;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .badge-si { background-color: #10b981; }
+        .badge-entonces { background-color: #3b82f6; }
+        .badge-sino { background-color: #64748b; }
     </style>
 </head>
 <body class="bg-slate-50 h-screen flex overflow-hidden font-sans text-slate-800 relative bg-pattern">
@@ -128,35 +178,46 @@
         <div class="flex-1 flex overflow-hidden">
             
             <div class="w-80 bg-white border-r border-slate-200 shadow-xl z-10 flex flex-col hide-scroll overflow-auto">
-                <div class="p-6 border-b border-slate-100">
-                    <h3 class="font-black text-slate-800 mb-4"><i class="fa-solid fa-cube text-blue-500 mr-2"></i> 1. Crear Variables</h3>
+                
+                <div class="p-6 border-b border-slate-100 bg-slate-50/50">
+                    <h3 class="font-black text-slate-800 mb-4 text-sm uppercase tracking-widest"><i class="fa-solid fa-cube text-blue-500 mr-2"></i> 1. Inyectar Memoria</h3>
+                    
+                    <div class="space-y-3 mb-6">
+                        <label class="text-xs font-bold text-slate-400">Crear Variable (Ej. bono)</label>
+                        <input type="text" id="var-name" placeholder="Nombre variable" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        <input type="number" id="var-val" placeholder="Valor inicial (Ej. 1000)" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500 shadow-sm">
+                        <button onclick="crearVarVisual()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-sm transition-colors shadow">Añadir Variable</button>
+                    </div>
+                    
                     <div class="space-y-3">
-                        <input type="text" id="var-name" placeholder="Nombre (ej. salario)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500">
-                        <input type="number" id="var-val" placeholder="Valor (ej. 4000)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500">
-                        <button onclick="crearVarVisual()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-sm transition-colors">Añadir Variable</button>
+                        <label class="text-xs font-bold text-slate-400">Crear Número Fijo (Ej. 0, 100)</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="num-val" placeholder="0" class="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-amber-500 shadow-sm">
+                            <button onclick="crearNumVisual()" class="bg-amber-500 hover:bg-amber-600 text-white px-4 rounded-lg font-bold shadow transition-colors"><i class="fa-solid fa-plus"></i></button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="p-6 border-b border-slate-100">
-                    <h3 class="font-black text-slate-800 mb-4"><i class="fa-solid fa-toolbox text-emerald-500 mr-2"></i> Paleta de Bloques</h3>
-                    <p class="text-xs text-slate-500 mb-4">Arrastra estos bloques al lienzo.</p>
+                <div class="p-6 border-b border-slate-100 flex-1">
+                    <h3 class="font-black text-slate-800 mb-4 text-sm uppercase tracking-widest"><i class="fa-solid fa-toolbox text-emerald-500 mr-2"></i> 2. Paleta de Bloques</h3>
                     
-                    <div class="mb-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Variables Creadas</span>
-                        <div id="palette-vars" class="flex flex-wrap gap-2 min-h-[30px]">
+                    <div class="mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-3">Tus Variables y Números</span>
+                        <div id="palette-vars" class="flex flex-wrap gap-2 mb-3 min-h-[30px]">
+                            <span class="text-xs text-slate-400 italic">No hay variables aún.</span>
+                        </div>
+                        <div id="palette-nums" class="flex flex-wrap gap-2 min-h-[30px]">
                             </div>
                     </div>
-                    
-                    <div class="mb-4">
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Números Fijos</span>
-                        <div class="flex gap-2 mb-2">
-                            <input type="number" id="num-val" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-sm font-bold outline-none">
-                            <button onclick="crearNumVisual()" class="bg-amber-500 text-white px-3 rounded-lg font-bold"><i class="fa-solid fa-plus"></i></button>
+
+                    <div class="mb-6">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Asignación</span>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="pill pill-assign" draggable="true" ondragstart="drag(event)" data-val="=" data-type="assign">Igual (=)</div>
                         </div>
-                        <div id="palette-nums" class="flex flex-wrap gap-2 min-h-[30px]"></div>
                     </div>
 
-                    <div class="mb-4">
+                    <div class="mb-6">
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Operadores Matemáticos</span>
                         <div class="flex flex-wrap gap-2">
                             <div class="pill pill-op" draggable="true" ondragstart="drag(event)" data-val="+" data-type="op"><i class="fa-solid fa-plus mr-1"></i> Sumar</div>
@@ -169,9 +230,9 @@
                     <div>
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Comparadores Lógicos</span>
                         <div class="flex flex-wrap gap-2">
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor a (>)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor a (<)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="==" data-type="comp">Igual a (==)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor (>)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor (<)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="==" data-type="comp">Igualdad (==)</div>
                         </div>
                     </div>
                 </div>
@@ -180,23 +241,29 @@
             <div class="flex-1 overflow-auto p-8 relative" id="vista-lienzo">
                 <div class="max-w-4xl mx-auto h-full flex flex-col">
                     
-                    <div class="flex justify-between items-center mb-6">
-                        <h2 class="text-2xl font-black text-slate-800"><i class="fa-solid fa-object-group text-blue-500 mr-2"></i> 2. Lienzo de Lógica</h2>
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <div>
+                            <h2 class="text-2xl font-black text-slate-800"><i class="fa-solid fa-object-group text-blue-500 mr-2"></i> 3. Lienzo de Construcción</h2>
+                            <p class="text-sm text-slate-500 font-medium mt-1">Añade plantillas y arrastra los bloques hacia los huecos punteados.</p>
+                        </div>
                         <div class="flex gap-2">
-                            <button onclick="addCalcRow()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm">
-                                + Añadir Operación
+                            <button onclick="addIfRow()" class="bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 font-black py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center">
+                                <i class="fa-solid fa-plus mr-2"></i> Condición SI
                             </button>
-                            <button onclick="addIfRow()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm">
-                                + Añadir Regla SI
+                            <button onclick="addCalcRow()" class="bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-black py-2 px-4 rounded-xl shadow-sm transition-colors text-sm flex items-center">
+                                <i class="fa-solid fa-plus mr-2"></i> Operación
                             </button>
                         </div>
                     </div>
 
-                    <div id="canvas-area" class="flex-1 bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-300 p-6 overflow-auto">
-                        <div class="text-center text-slate-400 font-bold mt-10" id="canvas-empty">
-                            <i class="fa-solid fa-arrow-pointer text-4xl mb-3"></i>
-                            <p>Utiliza los botones de arriba para añadir bloques y arrastra los elementos de la izquierda hacia los espacios vacíos.</p>
+                    <div id="canvas-area" class="flex-1 bg-slate-100/80 rounded-3xl border-2 border-dashed border-slate-300 p-8 overflow-auto shadow-inner relative">
+                        
+                        <div class="text-center text-slate-400 font-bold mt-20" id="canvas-empty">
+                            <i class="fa-solid fa-arrow-pointer text-6xl mb-4 text-slate-300"></i>
+                            <p class="text-xl text-slate-500 mb-2">El lienzo está vacío.</p>
+                            <p class="text-sm font-medium">1. Crea tus variables a la izquierda.<br>2. Añade una plantilla usando los botones de arriba.<br>3. Arrastra las pastillas hacia los huecos de la plantilla.</p>
                         </div>
+                        
                     </div>
 
                 </div>
@@ -205,7 +272,7 @@
             <div id="vista-cargando" class="hidden flex-1 flex-col items-center justify-center p-10 bg-white z-50 absolute inset-0">
                 <div class="w-32 h-32 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-10 shadow-lg"></div>
                 <h2 class="text-4xl font-black text-slate-800 mb-4">Procesando Lógica Visual</h2>
-                <p class="text-slate-500 font-bold text-xl mb-12">Convirtiendo bloques a código y compilando...</p>
+                <p class="text-slate-500 font-bold text-xl mb-12">Traduciendo rompecabezas a código y evaluando memoria...</p>
                 <div class="w-80"><div class="loader-bar"></div></div>
             </div>
 
@@ -218,22 +285,23 @@
                     </div>
                     
                     <div class="flex-1 overflow-auto p-10 flex flex-col">
-                        <div class="text-center mb-10">
-                            <div class="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-200">
-                                <i class="fa-solid fa-file-invoice-dollar text-5xl text-blue-600"></i>
+                        <div class="text-center mb-12">
+                            <div class="w-28 h-28 bg-blue-50 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-100">
+                                <i class="fa-solid fa-file-invoice-dollar text-6xl text-blue-600"></i>
                             </div>
                             <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-3 tracking-tight">Nómina Procesada</h2>
-                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados visualmente.</p>
+                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados y listos para desembolso corporativo.</p>
                         </div>
                         
-                        <div id="contenedor-tarjetas" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12"></div>
+                        <div id="contenedor-tarjetas" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
+                            </div>
                         
                         <div class="mt-auto w-full border-t border-slate-100 pt-8">
                             <div class="flex flex-col sm:flex-row justify-center gap-6 mb-8">
-                                <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-5 px-8 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
+                                <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
                                     <i class="fa-solid fa-file-signature mr-3 text-2xl"></i> Autorizar y Emitir
                                 </button>
-                                <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 min-w-[200px] bg-slate-100 text-slate-400 font-black text-xl py-5 px-8 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200">
+                                <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 bg-slate-100 text-slate-400 font-black text-xl py-6 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200">
                                     <i class="fa-solid fa-lock mr-3 text-2xl" id="icon-pdf"></i> PDF Informe
                                 </button>
                             </div>
@@ -251,26 +319,27 @@
 
     <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative border-t-8 border-emerald-600">
-            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
-                <i class="fa-solid fa-lock text-4xl text-slate-700"></i>
+            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
+                <i class="fa-solid fa-lock text-5xl text-slate-700"></i>
             </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">Autorización Bancaria</h2>
-            <p class="text-slate-500 mb-8 text-sm">Ingrese su clave corporativa.</p>
+            <h2 class="text-3xl font-black text-slate-800 mb-2">Autorización</h2>
+            <p class="text-slate-500 mb-8 font-medium">Clave corporativa requerida.</p>
 
             <div class="text-left mb-6">
-                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Token Seguro:</label>
-                <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-2xl rounded-xl focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Contraseña Segura:</label>
+                <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-center text-3xl rounded-xl focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
             </div>
             
-            <p id="error-password" class="text-red-500 text-sm font-bold h-6 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial denegada.</p>
+            <p id="error-password" class="text-red-500 font-bold h-6 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial denegada.</p>
             
             <div id="loading-password" class="hidden mb-6 mt-4">
                 <div class="loader-bar"></div>
+                <p class="text-sm text-slate-500 mt-4 font-bold uppercase tracking-widest">Verificando en servidor...</p>
             </div>
 
-            <div class="flex gap-4 mt-2" id="botones-seguridad">
-                <button onclick="cerrarModalSeguridad()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
-                <button onclick="verificarFirma()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-105 flex justify-center items-center">
+            <div class="flex gap-4 mt-4" id="botones-seguridad">
+                <button onclick="cerrarModalSeguridad()" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
+                <button onclick="verificarFirma()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-xl transition-transform hover:scale-105 flex justify-center items-center text-lg">
                     <i class="fa-solid fa-fingerprint mr-2"></i> Procesar
                 </button>
             </div>
@@ -278,37 +347,48 @@
     </div>
 
     <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
-            <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
-            <div id="modal-icon-bg" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i id="modal-icon" class=""></i></div>
-            <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-3"></h2>
-            <p id="modal-desc" class="text-slate-500 mb-10 text-lg leading-relaxed"></p>
-            <button id="modal-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-6 rounded-xl shadow-xl transition-transform hover:scale-105 text-lg flex justify-center items-center"></button>
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-lg w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
+            <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-3xl"></i></button>
+            <div id="modal-icon-bg" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i id="modal-icon" class=""></i></div>
+            <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-4"></h2>
+            <p id="modal-desc" class="text-slate-500 mb-10 text-xl leading-relaxed"></p>
+            <button id="modal-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-black py-5 px-6 rounded-2xl shadow-xl transition-transform hover:scale-105 text-xl flex justify-center items-center"></button>
         </div>
     </div>
 
+    <div id="pdf-container" class="hidden absolute top-[-9999px] left-[-9999px] bg-white text-slate-800 p-0 w-[800px]"></div>
+
     <script>
-        // Memoria y estado
         let visualVars = [];
         let memoriaRAMGlobal = {}; 
         let nominaAprobada = false;
 
-        // ==================== LÓGICA DRAG & DROP ====================
+        // ==================== 1. CREADOR DE VARIABLES Y NÚMEROS ====================
         function crearVarVisual() {
-            let name = document.getElementById('var-name').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
-            let val = document.getElementById('var-val').value.trim();
-            if (!name) { alert("Ponle un nombre a la variable."); return; }
-            if (visualVars.find(v => v.name === name)) { alert("Variable ya existe."); return; }
+            let nameInput = document.getElementById('var-name').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+            let valInput = document.getElementById('var-val').value.trim();
             
-            visualVars.push({ name: name, value: val || 0 });
+            if (!nameInput) { 
+                alert("Debes asignar un nombre a la variable."); 
+                return; 
+            }
+            if (visualVars.find(v => v.name === nameInput)) { 
+                alert("Esta variable ya existe."); 
+                return; 
+            }
+            
+            visualVars.push({ name: nameInput, value: valInput || 0 });
+            
             document.getElementById('var-name').value = '';
             document.getElementById('var-val').value = '';
+            
             actualizarPaleta();
         }
 
         function crearNumVisual() {
             let val = document.getElementById('num-val').value.trim();
-            if (!val) return;
+            if (val === '') return;
+            
             const container = document.getElementById('palette-nums');
             container.innerHTML += `<div class="pill pill-num" draggable="true" ondragstart="drag(event)" data-val="${val}" data-type="num">${val}</div>`;
             document.getElementById('num-val').value = '';
@@ -317,22 +397,26 @@
         function actualizarPaleta() {
             const container = document.getElementById('palette-vars');
             container.innerHTML = '';
+            if (visualVars.length === 0) {
+                container.innerHTML = '<span class="text-xs text-slate-400 italic">No hay variables aún.</span>';
+                return;
+            }
             visualVars.forEach(v => {
-                container.innerHTML += `<div class="pill pill-var" draggable="true" ondragstart="drag(event)" data-val="${v.name}" data-type="var">${v.name}</div>`;
+                container.innerHTML += `<div class="pill pill-var" draggable="true" ondragstart="drag(event)" data-val="${v.name}" data-type="var" title="Valor Inicial: ${v.value}">${v.name}</div>`;
             });
         }
 
-        // Eventos D&D nativos
+        // ==================== 2. EVENTOS DRAG & DROP ====================
         function drag(ev) {
             ev.dataTransfer.setData("val", ev.target.getAttribute('data-val'));
             ev.dataTransfer.setData("type", ev.target.getAttribute('data-type'));
             
-            // Setear el color para reconstruir el pill al hacer drop
             let color = "bg-slate-500";
             if(ev.target.classList.contains('pill-var')) color = "pill-var";
             if(ev.target.classList.contains('pill-num')) color = "pill-num";
             if(ev.target.classList.contains('pill-op')) color = "pill-op";
             if(ev.target.classList.contains('pill-comp')) color = "pill-comp";
+            if(ev.target.classList.contains('pill-assign')) color = "pill-assign";
             
             ev.dataTransfer.setData("color", color);
         }
@@ -355,15 +439,32 @@
             let type = ev.dataTransfer.getData("type");
             let color = ev.dataTransfer.getData("color");
             
-            // Validar que no metan un operador donde va una variable
-            let reqType = el.getAttribute('data-req'); // 'var_num', 'op', 'comp', 'var'
-            if(reqType === 'var' && type !== 'var') { alert("Aquí solo puedes poner una Variable (Azul)."); return; }
-            if(reqType === 'var_num' && (type !== 'var' && type !== 'num')) { alert("Aquí solo puedes poner Variable o Número."); return; }
-            if(reqType === 'op' && type !== 'op') { alert("Aquí solo va un Operador Matemático (+, -, *, /)."); return; }
-            if(reqType === 'comp' && type !== 'comp') { alert("Aquí solo va un Comparador (>, <, ==)."); return; }
+            let reqType = el.getAttribute('data-req'); // 'var_num', 'op', 'comp', 'var', 'assign'
+            
+            // Validaciones estrictas
+            if(reqType === 'var' && type !== 'var') { 
+                mostrarModal('Pieza Incorrecta', 'En este hueco solo puedes colocar una Variable (Bloque Azul).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                return; 
+            }
+            if(reqType === 'var_num' && (type !== 'var' && type !== 'num')) { 
+                mostrarModal('Pieza Incorrecta', 'En este hueco solo puedes colocar una Variable (Azul) o un Número (Naranja).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                return; 
+            }
+            if(reqType === 'op' && type !== 'op') { 
+                mostrarModal('Pieza Incorrecta', 'Aquí solo puedes colocar un Operador Matemático (+, -, *, /).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                return; 
+            }
+            if(reqType === 'comp' && type !== 'comp') { 
+                mostrarModal('Pieza Incorrecta', 'Aquí solo puedes colocar un Comparador Lógico (>, <, ==).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                return; 
+            }
+            if(reqType === 'assign' && type !== 'assign') { 
+                mostrarModal('Falta Signo Igual', 'En esta zona debes colocar el símbolo de Asignación (=) para que la instrucción tenga sentido.', 'fa-equals', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                return; 
+            }
 
             // Llenar el Dropzone
-            el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${val}</div>`;
+            el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer hover:scale-95" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${val}</div>`;
             el.setAttribute('data-filled', val);
             el.classList.add('filled');
         }
@@ -374,18 +475,23 @@
             el.classList.remove('filled');
         }
 
-        // ==================== CREADOR DE FILAS (LIENZO) ====================
+        // ==================== 3. CREADOR DE PLANTILLAS EN EL LIENZO ====================
         function addCalcRow() {
             document.getElementById('canvas-empty').style.display = 'none';
             const area = document.getElementById('canvas-area');
             const row = document.createElement('div');
             row.className = "logic-row row-calc fade-in relative";
             row.innerHTML = `
-                <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold shadow hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                <button onclick="this.parentElement.remove()" class="absolute -top-3 -right-3 w-8 h-8 bg-white border border-slate-200 text-red-500 rounded-full flex items-center justify-center font-bold shadow-md hover:bg-red-500 hover:text-white transition-colors z-10"><i class="fa-solid fa-trash-can text-sm"></i></button>
+                
                 <div class="dropzone dz-res" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
-                <span class="font-black text-slate-400 text-xl mx-2">=</span>
+                
+                <div class="dropzone dropzone-assign dz-assign" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
+                
                 <div class="dropzone dz-v1" data-req="var_num" data-label="Valor 1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 1</div>
-                <div class="dropzone dz-op" data-req="op" data-label="Op" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Op</div>
+                
+                <div class="dropzone dropzone-op dz-op" data-req="op" data-label="Op" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Op</div>
+                
                 <div class="dropzone dz-v2" data-req="var_num" data-label="Valor 2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 2</div>
             `;
             area.appendChild(row);
@@ -397,36 +503,36 @@
             const row = document.createElement('div');
             row.className = "logic-row row-if fade-in relative flex-col items-start";
             row.innerHTML = `
-                <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold shadow hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                <button onclick="this.parentElement.remove()" class="absolute -top-3 -right-3 w-8 h-8 bg-white border border-slate-200 text-red-500 rounded-full flex items-center justify-center font-bold shadow-md hover:bg-red-500 hover:text-white transition-colors z-10"><i class="fa-solid fa-trash-can text-sm"></i></button>
                 
-                <div class="flex items-center flex-wrap gap-2 mb-2 w-full">
-                    <span class="bg-emerald-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">SI</span>
-                    <div class="dropzone dz-cv1" data-req="var_num" data-label="Var" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var</div>
-                    <div class="dropzone dz-comp" data-req="comp" data-label="Cond" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Cond</div>
-                    <div class="dropzone dz-cv2" data-req="var_num" data-label="Meta" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Meta</div>
+                <div class="flex items-center flex-wrap gap-3 mb-3 w-full">
+                    <span class="badge-logic badge-si">SI</span>
+                    <div class="dropzone dz-cv1" data-req="var_num" data-label="Var / Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var / Num</div>
+                    <div class="dropzone dropzone-comp dz-comp" data-req="comp" data-label="Cond" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Cond</div>
+                    <div class="dropzone dz-cv2" data-req="var_num" data-label="Var / Num" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var / Num</div>
                 </div>
                 
-                <div class="flex items-center flex-wrap gap-2 mb-2 pl-8 border-l-2 border-slate-300 ml-4 w-full">
-                    <span class="bg-blue-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">ENTONCES</span>
+                <div class="flex items-center flex-wrap gap-3 mb-3 pl-6 md:pl-10 border-l-4 border-blue-200 ml-4 w-full">
+                    <span class="badge-logic badge-entonces">ENTONCES</span>
                     <div class="dropzone dz-tv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
-                    <span class="font-black text-slate-400">=</span>
-                    <div class="dropzone dz-tval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
+                    <div class="dropzone dropzone-assign dz-assign-t" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
+                    <div class="dropzone dz-tval" data-req="var_num" data-label="Valor Final" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor Final</div>
                 </div>
 
-                <div class="flex items-center flex-wrap gap-2 pl-8 border-l-2 border-slate-300 ml-4 w-full opacity-80">
-                    <span class="bg-slate-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">SINO</span>
+                <div class="flex items-center flex-wrap gap-3 pl-6 md:pl-10 border-l-4 border-slate-200 ml-4 w-full opacity-90">
+                    <span class="badge-logic badge-sino">SINO</span>
                     <div class="dropzone dz-fv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
-                    <span class="font-black text-slate-400">=</span>
-                    <div class="dropzone dz-fval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
+                    <div class="dropzone dropzone-assign dz-assign-f" data-req="assign" data-label="=" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">=</div>
+                    <div class="dropzone dz-fval" data-req="var_num" data-label="Valor Final" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor Final</div>
                 </div>
             `;
             area.appendChild(row);
         }
 
-        // ==================== TRADUCCIÓN VISUAL A CÓDIGO Y COMPILACIÓN ====================
+        // ==================== 4. PROCESADOR NO-CODE A CÓDIGO ====================
         function procesarNoCode() {
             if (visualVars.length === 0) {
-                mostrarModal('Aviso', 'Debes crear al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
+                mostrarModal('Faltan Variables', 'Debes crear e inyectar al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
                 return;
             }
 
@@ -438,7 +544,7 @@
 
             let rows = document.querySelectorAll('.logic-row');
             if (rows.length === 0) {
-                mostrarModal('Lienzo Vacío', 'Añade alguna regla o cálculo en el lienzo.', 'fa-object-group', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
+                mostrarModal('Lienzo Vacío', 'Añade alguna plantilla y arrastra los bloques antes de procesar.', 'fa-object-group', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
                 return;
             }
 
@@ -446,27 +552,35 @@
             rows.forEach(row => {
                 if (row.classList.contains('row-calc')) {
                     let rRes = row.querySelector('.dz-res').getAttribute('data-filled');
+                    let rAssign = row.querySelector('.dz-assign').getAttribute('data-filled');
                     let rV1 = row.querySelector('.dz-v1').getAttribute('data-filled');
                     let rOp = row.querySelector('.dz-op').getAttribute('data-filled');
                     let rV2 = row.querySelector('.dz-v2').getAttribute('data-filled');
-                    if(!rRes || !rV1 || !rOp || !rV2) hasEmpty = true;
-                    code += `  ${rRes} = ${rV1} ${rOp} ${rV2};\n`;
+                    
+                    if(!rRes || !rAssign || !rV1 || !rOp || !rV2) hasEmpty = true;
+                    else code += `  ${rRes} ${rAssign} ${rV1} ${rOp} ${rV2};\n`;
+                    
                 } else if (row.classList.contains('row-if')) {
                     let rV1 = row.querySelector('.dz-cv1').getAttribute('data-filled');
                     let rComp = row.querySelector('.dz-comp').getAttribute('data-filled');
                     let rV2 = row.querySelector('.dz-cv2').getAttribute('data-filled');
+                    
                     let rTv = row.querySelector('.dz-tv').getAttribute('data-filled');
+                    let rTassign = row.querySelector('.dz-assign-t').getAttribute('data-filled');
                     let rTval = row.querySelector('.dz-tval').getAttribute('data-filled');
+                    
                     let rFv = row.querySelector('.dz-fv').getAttribute('data-filled');
+                    let rFassign = row.querySelector('.dz-assign-f').getAttribute('data-filled');
                     let rFval = row.querySelector('.dz-fval').getAttribute('data-filled');
-                    if(!rV1 || !rComp || !rV2 || !rTv || !rTval || !rFv || !rFval) hasEmpty = true;
-                    code += `  SI ${rV1} ${rComp} ${rV2} ENTONCES\n   ${rTv} = ${rTval};\n  SINO\n   ${rFv} = ${rFval};\n  FIN SI;\n`;
+                    
+                    if(!rV1 || !rComp || !rV2 || !rTv || !rTassign || !rTval || !rFv || !rFassign || !rFval) hasEmpty = true;
+                    else code += `  SI ${rV1} ${rComp} ${rV2} ENTONCES\n   ${rTv} ${rTassign} ${rTval};\n  SINO\n   ${rFv} ${rFassign} ${rFval};\n  FIN SI;\n`;
                 }
             });
             code += "FIN";
 
             if (hasEmpty) {
-                mostrarModal('Bloques Incompletos', 'Hay espacios vacíos en tu lienzo. Arrastra las piezas correctas desde la Paleta.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Bloques Incompletos', 'Hay huecos vacíos en el lienzo. Arrastra las piezas correctas de la Paleta.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
                 return;
             }
 
@@ -475,17 +589,16 @@
             document.getElementById('vista-cargando').classList.remove('hidden');
             document.getElementById('vista-cargando').classList.add('flex', 'fade-in');
 
-            // En lugar de depender de la API de Node (que no está visualmente acá), ejecutamos el evaluador semántico directo para mantenerlo No-Code rápido.
+            // Evaluar lógica en background
             setTimeout(() => {
                 ejecutarSilenciosoLocal(code);
             }, 2500);
         }
 
-        // El intérprete en JS integrado para procesar la lógica pura generada por los bloques visuales
+        // Interprete local silencioso para el modo visual
         function ejecutarSilenciosoLocal(codigo) {
             memoriaRAMGlobal = {};
             try {
-                // Parseo manual simplificado para la estructura que genera el constructor visual
                 let lineas = codigo.split('\n');
                 let inIf = false;
                 let ifConditionTrue = false;
@@ -516,14 +629,14 @@
                     }
                     else if (trim.startsWith('SINO')) {
                         inIf = true;
-                        ifConditionTrue = !ifConditionTrue; // Invert logic for SINO block
+                        ifConditionTrue = !ifConditionTrue; 
                     }
                     else if (trim.startsWith('FIN SI')) {
                         inIf = false;
                     }
                     // Asignación u Operación
                     else {
-                        if (inIf && !ifConditionTrue) return; // Skip if condition is false
+                        if (inIf && !ifConditionTrue) return; 
                         
                         let clean = trim.replace(';', '');
                         let assignSplit = clean.split('=');
@@ -560,6 +673,7 @@
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 
+                nominaAprobada = false;
                 generarTarjetasResultados();
                 
                 document.getElementById('vista-resultados').classList.remove('hidden');
@@ -569,11 +683,11 @@
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 document.getElementById('vista-lienzo').classList.remove('hidden');
-                mostrarModal('Error Interno', 'La lógica contiene errores incompatibles. Asegúrate de declarar todas las variables que uses.', 'fa-skull-crossbones', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Error de Lógica', 'La lógica financiera contiene errores. Revisa que todas las variables utilizadas hayan sido creadas en el Paso 1.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
             }
         }
 
-        // ==================== DASHBOARD FINAL ====================
+        // ==================== 5. RESULTADOS Y PDF ====================
         function generarTarjetasResultados() {
             const contenedor = document.getElementById('contenedor-tarjetas');
             let tarjetasHTML = '';
@@ -587,7 +701,7 @@
                 
                 if(textoAmigable.includes("SALARIO")) { icon = "fa-building-columns text-blue-500"; }
                 if(textoAmigable.includes("VENTA")) { icon = "fa-chart-line text-amber-500"; }
-                if(textoAmigable.includes("BONO")) { icon = "fa-hand-holding-dollar text-emerald-500"; }
+                if(textoAmigable.includes("BONO") || textoAmigable.includes("COMISION")) { icon = "fa-hand-holding-dollar text-emerald-500"; }
                 if(textoAmigable.includes("TOTAL") || textoAmigable.includes("PAGAR")) { 
                     icon = "fa-sack-dollar text-emerald-600";
                     bgClass = "bg-emerald-50 border-emerald-200 shadow-md";
@@ -624,26 +738,7 @@
             btnAprobar.className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center";
         }
 
-        // ==================== UTILIDADES / MODALES ====================
-        function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
-            document.getElementById('modal-icon').className = `fa-solid ${icono} text-6xl ${colorIcono}`;
-            document.getElementById('modal-icon-bg').className = `w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ${bgIcono}`;
-            document.getElementById('modal-title').innerText = titulo;
-            document.getElementById('modal-desc').innerText = desc;
-            const btn = document.getElementById('modal-btn');
-            btn.innerHTML = textoBtn; btn.setAttribute('onclick', accionBtn);
-            const modal = document.getElementById('modal-fase-completada');
-            modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('modal-content').classList.remove('scale-95'); }, 50);
-        }
-
-        function cerrarModal() {
-            const modal = document.getElementById('modal-fase-completada');
-            modal.classList.add('opacity-0'); document.getElementById('modal-content').classList.add('scale-95');
-            setTimeout(() => { modal.classList.add('hidden'); }, 300);
-        }
-
-        // ==================== SEGURIDAD ====================
+        // Modal de Seguridad
         function abrirModalSeguridad() {
             document.getElementById('input-password').value = '';
             document.getElementById('error-password').classList.add('opacity-0');
@@ -652,7 +747,10 @@
             
             const modal = document.getElementById('modal-seguridad');
             modal.classList.remove('hidden');
-            setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
+            setTimeout(() => { 
+                modal.classList.remove('opacity-0'); 
+                modal.firstElementChild.classList.remove('scale-95'); 
+            }, 50);
             
             document.getElementById('input-password').focus();
             document.getElementById('input-password').onkeydown = function(e){ if(e.key === 'Enter') verificarFirma(); };
@@ -660,7 +758,8 @@
 
         function cerrarModalSeguridad() {
             const modal = document.getElementById('modal-seguridad');
-            modal.classList.add('opacity-0'); modal.firstElementChild.classList.add('scale-95');
+            modal.classList.add('opacity-0'); 
+            modal.firstElementChild.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
@@ -710,7 +809,7 @@
                 
                 mostrarModal(
                     'Aprobación Exitosa', 
-                    `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total.toLocaleString('es-GT', {minimumFractionDigits: 2})} a la cuenta del USUARIO.`, 
+                    `Firma corporativa validada. Se ha ordenado una transferencia de Q. ${total.toLocaleString('es-GT', {minimumFractionDigits: 2})} a la cuenta del empleado.`, 
                     'fa-stamp', 
                     'text-emerald-600', 
                     'bg-emerald-100', 
@@ -720,7 +819,7 @@
             }, 1500);
         }
 
-        // ==================== GENERACIÓN DE PDF ====================
+        // Generar PDF corporativo
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Debe autorizar la nómina mediante Firma Electrónica antes de generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
