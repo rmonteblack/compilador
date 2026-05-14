@@ -230,8 +230,10 @@
                     <div>
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Comparadores Lógicos</span>
                         <div class="flex flex-wrap gap-2">
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor (>)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor (<)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor que (>)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor que (<)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">=" data-type="comp">Mayor o Igual (>=)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<=" data-type="comp">Menor o Igual (<=)</div>
                             <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="==" data-type="comp">Igualdad (==)</div>
                         </div>
                     </div>
@@ -290,7 +292,7 @@
                                 <i class="fa-solid fa-file-invoice-dollar text-6xl text-blue-600"></i>
                             </div>
                             <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-3 tracking-tight">Nómina Procesada</h2>
-                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados y listos para desembolso corporativo.</p>
+                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados visualmente.</p>
                         </div>
                         
                         <div id="contenedor-tarjetas" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
@@ -298,10 +300,10 @@
                         
                         <div class="mt-auto w-full border-t border-slate-100 pt-8">
                             <div class="flex flex-col sm:flex-row justify-center gap-6 mb-8">
-                                <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
+                                <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
                                     <i class="fa-solid fa-file-signature mr-3 text-2xl"></i> Autorizar y Emitir
                                 </button>
-                                <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 bg-slate-100 text-slate-400 font-black text-xl py-6 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200">
+                                <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 min-w-[200px] bg-slate-100 text-slate-400 font-black text-xl py-6 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200">
                                     <i class="fa-solid fa-lock mr-3 text-2xl" id="icon-pdf"></i> PDF Informe
                                 </button>
                             </div>
@@ -319,27 +321,26 @@
 
     <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
         <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative border-t-8 border-emerald-600">
-            <div class="w-24 h-24 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
-                <i class="fa-solid fa-lock text-5xl text-slate-700"></i>
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
+                <i class="fa-solid fa-lock text-4xl text-slate-700"></i>
             </div>
-            <h2 class="text-3xl font-black text-slate-800 mb-2">Autorización</h2>
-            <p class="text-slate-500 mb-8 font-medium">Clave corporativa requerida.</p>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Autorización Bancaria</h2>
+            <p class="text-slate-500 mb-8 text-sm">Ingrese su clave corporativa.</p>
 
             <div class="text-left mb-6">
                 <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Contraseña Segura:</label>
-                <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border-2 border-slate-200 text-slate-800 text-center text-3xl rounded-xl focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
+                <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-2xl rounded-xl focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
             </div>
             
-            <p id="error-password" class="text-red-500 font-bold h-6 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial denegada.</p>
+            <p id="error-password" class="text-red-500 text-sm font-bold h-6 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial denegada.</p>
             
             <div id="loading-password" class="hidden mb-6 mt-4">
                 <div class="loader-bar"></div>
-                <p class="text-sm text-slate-500 mt-4 font-bold uppercase tracking-widest">Verificando en servidor...</p>
             </div>
 
-            <div class="flex gap-4 mt-4" id="botones-seguridad">
-                <button onclick="cerrarModalSeguridad()" class="w-1/3 bg-slate-200 hover:bg-slate-300 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
-                <button onclick="verificarFirma()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-xl transition-transform hover:scale-105 flex justify-center items-center text-lg">
+            <div class="flex gap-4 mt-2" id="botones-seguridad">
+                <button onclick="cerrarModalSeguridad()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
+                <button onclick="verificarFirma()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-105 flex justify-center items-center text-lg">
                     <i class="fa-solid fa-fingerprint mr-2"></i> Procesar
                 </button>
             </div>
@@ -347,7 +348,7 @@
     </div>
 
     <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-lg w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-3xl"></i></button>
             <div id="modal-icon-bg" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i id="modal-icon" class=""></i></div>
             <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-4"></h2>
@@ -363,7 +364,7 @@
         let memoriaRAMGlobal = {}; 
         let nominaAprobada = false;
 
-        // ==================== 1. CREADOR DE VARIABLES Y NÚMEROS ====================
+        // ==================== LÓGICA DRAG & DROP ====================
         function crearVarVisual() {
             let nameInput = document.getElementById('var-name').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
             let valInput = document.getElementById('var-val').value.trim();
@@ -406,7 +407,7 @@
             });
         }
 
-        // ==================== 2. EVENTOS DRAG & DROP ====================
+        // --- Eventos D&D nativos ---
         function drag(ev) {
             ev.dataTransfer.setData("val", ev.target.getAttribute('data-val'));
             ev.dataTransfer.setData("type", ev.target.getAttribute('data-type'));
@@ -455,7 +456,7 @@
                 return; 
             }
             if(reqType === 'comp' && type !== 'comp') { 
-                mostrarModal('Pieza Incorrecta', 'Aquí solo puedes colocar un Comparador Lógico (>, <, ==).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
+                mostrarModal('Pieza Incorrecta', 'Aquí solo puedes colocar un Comparador Lógico (>, <, >=, <=, ==).', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Entendido', 'cerrarModal()');
                 return; 
             }
             if(reqType === 'assign' && type !== 'assign') { 
@@ -475,7 +476,7 @@
             el.classList.remove('filled');
         }
 
-        // ==================== 3. CREADOR DE PLANTILLAS EN EL LIENZO ====================
+        // ==================== CREADOR DE FILAS (LIENZO) ====================
         function addCalcRow() {
             document.getElementById('canvas-empty').style.display = 'none';
             const area = document.getElementById('canvas-area');
@@ -529,7 +530,7 @@
             area.appendChild(row);
         }
 
-        // ==================== 4. PROCESADOR NO-CODE A CÓDIGO ====================
+        // ==================== PROCESADOR NO-CODE A CÓDIGO Y EJECUCIÓN ====================
         function procesarNoCode() {
             if (visualVars.length === 0) {
                 mostrarModal('Faltan Variables', 'Debes crear e inyectar al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
@@ -580,7 +581,7 @@
             code += "FIN";
 
             if (hasEmpty) {
-                mostrarModal('Bloques Incompletos', 'Hay huecos vacíos en el lienzo. Arrastra las piezas correctas de la Paleta.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Bloques Incompletos', 'Hay huecos vacíos en el lienzo. Arrastra las piezas correctas de la Paleta para completarlos.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
                 return;
             }
 
@@ -589,13 +590,13 @@
             document.getElementById('vista-cargando').classList.remove('hidden');
             document.getElementById('vista-cargando').classList.add('flex', 'fade-in');
 
-            // Evaluar lógica en background
+            // Evaluar lógica en background (Simula el envío al backend)
             setTimeout(() => {
                 ejecutarSilenciosoLocal(code);
             }, 2500);
         }
 
-        // Interprete local silencioso para el modo visual
+        // Intérprete JavaScript para Procesar lo que armó el usuario
         function ejecutarSilenciosoLocal(codigo) {
             memoriaRAMGlobal = {};
             try {
@@ -607,25 +608,33 @@
                     let trim = l.trim();
                     if (!trim || trim === 'INICIO' || trim === 'FIN') return;
 
-                    // Declaraciones
+                    // 1. Declaraciones
                     if (trim.startsWith('VAR')) {
                         let parts = trim.replace('VAR', '').replace(';', '').split('=');
                         let name = parts[0].trim();
                         let val = parts.length > 1 ? parseFloat(parts[1].trim()) : 0;
                         memoriaRAMGlobal[name] = { valor: isNaN(val)?0:val, categoria: 'VAR' };
                     }
-                    // Condicional SI
+                    // 2. Condicional SI
                     else if (trim.startsWith('SI')) {
                         inIf = true;
                         let condStr = trim.replace('SI', '').replace('ENTONCES', '').trim();
-                        let parts = condStr.split(' ');
-                        let v1 = isNaN(parts[0]) ? parseFloat(memoriaRAMGlobal[parts[0]].valor) : parseFloat(parts[0]);
-                        let op = parts[1];
-                        let v2 = isNaN(parts[2]) ? parseFloat(memoriaRAMGlobal[parts[2]].valor) : parseFloat(parts[2]);
+                        // El split asume espacios entre los bloques: "ventas > 100" o "ventas == 100"
+                        let parts = condStr.split(' '); 
                         
-                        if(op === '>') ifConditionTrue = v1 > v2;
-                        if(op === '<') ifConditionTrue = v1 < v2;
-                        if(op === '==') ifConditionTrue = v1 === v2;
+                        let v1Str = parts[0];
+                        let opStr = parts[1];
+                        let v2Str = parts[2];
+
+                        let v1 = isNaN(v1Str) ? parseFloat(memoriaRAMGlobal[v1Str].valor) : parseFloat(v1Str);
+                        let v2 = isNaN(v2Str) ? parseFloat(memoriaRAMGlobal[v2Str].valor) : parseFloat(v2Str);
+                        
+                        // Evaluador de Comparadores actualizado
+                        if(opStr === '>') ifConditionTrue = v1 > v2;
+                        if(opStr === '<') ifConditionTrue = v1 < v2;
+                        if(opStr === '>=') ifConditionTrue = v1 >= v2;
+                        if(opStr === '<=') ifConditionTrue = v1 <= v2;
+                        if(opStr === '==') ifConditionTrue = v1 === v2;
                     }
                     else if (trim.startsWith('SINO')) {
                         inIf = true;
@@ -634,7 +643,7 @@
                     else if (trim.startsWith('FIN SI')) {
                         inIf = false;
                     }
-                    // Asignación u Operación
+                    // 3. Asignación u Operación Matemática
                     else {
                         if (inIf && !ifConditionTrue) return; 
                         
@@ -645,6 +654,7 @@
                         let target = assignSplit[0].trim();
                         let expr = assignSplit[1].trim();
                         
+                        // Detectar si hay matemática (+ - * /)
                         let opMatch = expr.match(/([\w\d_]+)\s*([\+\-\*\/])\s*([\w\d_]+)/);
                         if (opMatch) {
                             let n1Str = opMatch[1];
@@ -662,14 +672,14 @@
                             
                             memoriaRAMGlobal[target].valor = res;
                         } else {
-                            // Simple assign
+                            // Asignación simple: bono = 1000
                             let n1 = isNaN(expr) ? parseFloat(memoriaRAMGlobal[expr].valor) : parseFloat(expr);
                             memoriaRAMGlobal[target].valor = n1;
                         }
                     }
                 });
 
-                // Transición a Resultados
+                // Transición a la pantalla de Resultados
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 
@@ -683,11 +693,11 @@
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 document.getElementById('vista-lienzo').classList.remove('hidden');
-                mostrarModal('Error de Lógica', 'La lógica financiera contiene errores. Revisa que todas las variables utilizadas hayan sido creadas en el Paso 1.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Error de Lógica', 'La lógica financiera contiene errores. Revisa que todas las variables utilizadas hayan sido creadas y arrastradas correctamente.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
             }
         }
 
-        // ==================== 5. RESULTADOS Y PDF ====================
+        // ==================== DASHBOARD FINAL ====================
         function generarTarjetasResultados() {
             const contenedor = document.getElementById('contenedor-tarjetas');
             let tarjetasHTML = '';
@@ -738,7 +748,7 @@
             btnAprobar.className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center";
         }
 
-        // Modal de Seguridad
+        // ==================== SEGURIDAD Y FIRMA ====================
         function abrirModalSeguridad() {
             document.getElementById('input-password').value = '';
             document.getElementById('error-password').classList.add('opacity-0');
@@ -747,10 +757,7 @@
             
             const modal = document.getElementById('modal-seguridad');
             modal.classList.remove('hidden');
-            setTimeout(() => { 
-                modal.classList.remove('opacity-0'); 
-                modal.firstElementChild.classList.remove('scale-95'); 
-            }, 50);
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
             
             document.getElementById('input-password').focus();
             document.getElementById('input-password').onkeydown = function(e){ if(e.key === 'Enter') verificarFirma(); };
@@ -758,8 +765,7 @@
 
         function cerrarModalSeguridad() {
             const modal = document.getElementById('modal-seguridad');
-            modal.classList.add('opacity-0'); 
-            modal.firstElementChild.classList.add('scale-95');
+            modal.classList.add('opacity-0'); modal.firstElementChild.classList.add('scale-95');
             setTimeout(() => { modal.classList.add('hidden'); }, 300);
         }
 
@@ -809,7 +815,7 @@
                 
                 mostrarModal(
                     'Aprobación Exitosa', 
-                    `Firma corporativa validada. Se ha ordenado una transferencia de Q. ${total.toLocaleString('es-GT', {minimumFractionDigits: 2})} a la cuenta del empleado.`, 
+                    `Firma corporativa validada. Se ha ordenado una transferencia irrevocable de Q. ${total.toLocaleString('es-GT', {minimumFractionDigits: 2})} a la cuenta del empleado.`, 
                     'fa-stamp', 
                     'text-emerald-600', 
                     'bg-emerald-100', 
@@ -819,7 +825,7 @@
             }, 1500);
         }
 
-        // Generar PDF corporativo
+        // ==================== GENERACIÓN DE PDF CORPORATIVO ====================
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Debe autorizar la nómina mediante Firma Electrónica antes de generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
