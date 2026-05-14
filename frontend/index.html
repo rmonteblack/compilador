@@ -19,7 +19,7 @@
         .shadow-glow-red { text-shadow: 0 0 8px rgba(220, 38, 38, 0.8); }
         .bloque-activo { transform: scale(1.02); z-index: 10; position: relative; }
         
-        /* ÁRBOL SINTÁCTICO */
+        /* MAGIA CSS PARA EL ÁRBOL SINTÁCTICO */
         .ast-tree * { margin: 0; padding: 0; box-sizing: border-box; }
         .ast-tree ul { padding-top: 20px; position: relative; transition: all 0.5s; display: flex; justify-content: center; }
         .ast-tree li { float: left; text-align: center; list-style-type: none; position: relative; padding: 20px 5px 0 5px; transition: all 0.5s; }
@@ -51,45 +51,10 @@
         .loader-bar::after { content: ''; display: block; width: 40%; height: 100%; background: #10b981; animation: loading 1s infinite ease-in-out; }
         @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
 
-        /* GESTALT EN MODO VISUAL: Agrupación, Cierre, y Color */
-        .bloque-grafico { 
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-left: 6px solid #3b82f6; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-            transition: transform 0.2s;
-        }
-        .bloque-grafico:hover {
-            transform: translateX(4px);
-        }
+        /* Estilo para los bloques gráficos */
+        .bloque-grafico { background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%); border-left: 4px solid #3b82f6; }
         .bloque-grafico-condicion { border-left-color: #10b981; }
         .bloque-grafico-calculo { border-left-color: #8b5cf6; }
-        
-        .input-visual {
-            background-color: #f8fafc;
-            border: 1px solid #cbd5e1;
-            border-radius: 0.5rem;
-            padding: 0.5rem 1rem;
-            font-weight: bold;
-            color: #334155;
-            outline: none;
-            transition: all 0.2s;
-            width: 100%;
-        }
-        .input-visual:focus {
-            background-color: #fff;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-        }
-        .etiqueta-visual {
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #64748b;
-            margin-bottom: 0.25rem;
-            display: block;
-        }
     </style>
 </head>
 <body class="bg-slate-50 h-screen flex overflow-hidden font-sans text-slate-800 relative">
@@ -99,23 +64,22 @@
             <i class="fa-solid fa-bolt text-blue-400 text-xl mr-3"></i>
             <h1 class="text-xl font-bold tracking-wider">PayLogic<span class="text-blue-400">.</span></h1>
         </div>
-        <nav class="flex-1 px-4 py-8 space-y-3">
-            <a href="presentacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
-                <i class="fa-solid fa-folder-open w-6 text-center mr-2"></i> Portafolio / Docs
+        <nav class="flex-1 px-4 py-6 space-y-2">
+            <a href="presentacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all">
+                <i class="fa-solid fa-folder-open mr-3"></i> Portafolio / Docs
             </a>
-            <a href="#" class="flex items-center px-4 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-900/50 transition-all">
-                <i class="fa-solid fa-code w-6 text-center mr-2"></i> Motor Live
+            <a href="#" class="flex items-center px-4 py-3 bg-blue-600 text-white rounded-lg shadow-md transition-all">
+                <i class="fa-solid fa-code mr-3"></i> Motor Live
             </a>
-            <a href="implementacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
-                <i class="fa-solid fa-plug w-6 text-center mr-2"></i> Implementación
+            <a href="implementacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-lg transition-all">
+                <i class="fa-solid fa-plug mr-3"></i> Implementación
             </a>
         </nav>
-        <div class="p-6 border-t border-slate-700 bg-slate-950">
+        <div class="p-4 border-t border-slate-700 bg-slate-950">
             <div class="flex items-center">
-                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-black shadow-inner">UMG</div>
+                <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold shadow-inner">UMG</div>
                 <div class="ml-3">
-                    <p class="text-sm font-bold text-white">Ing. en Sistemas</p>
-                    <p class="text-xs text-slate-400">Desarrollo B2B</p>
+                    <p class="text-sm font-medium text-white">Ing. en Sistemas</p>
                 </div>
             </div>
         </div>
@@ -124,12 +88,13 @@
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
         <header class="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
             <h2 class="text-lg font-semibold text-slate-700">Entorno de Desarrollo</h2>
-            <div class="flex items-center bg-slate-100 rounded-lg p-1 border border-slate-200 shadow-inner">
-                <button onclick="cambiarModo('codigo')" id="tab-codigo" class="px-5 py-2 text-sm font-bold text-white bg-blue-600 rounded-md shadow transition-all flex items-center">
-                    <i class="fa-solid fa-code mr-2"></i>Motor Clásico
+            
+            <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-200 shadow-inner">
+                <button onclick="cambiarModo('codigo')" id="tab-codigo" class="px-6 py-2 text-sm font-bold rounded-md bg-blue-600 text-white shadow transition-all flex items-center">
+                    <i class="fa-solid fa-code mr-2"></i> Modo Código
                 </button>
-                <button onclick="cambiarModo('grafico')" id="tab-grafico" class="px-5 py-2 text-sm font-bold text-slate-500 hover:text-slate-800 rounded-md transition-all flex items-center">
-                    <i class="fa-solid fa-shapes mr-2"></i>Modo No-Code
+                <button onclick="cambiarModo('grafico')" id="tab-grafico" class="px-6 py-2 text-sm font-bold rounded-md text-slate-500 hover:text-slate-800 transition-all flex items-center">
+                    <i class="fa-solid fa-shapes mr-2"></i> Modo Visual (No-Code)
                 </button>
             </div>
         </header>
@@ -148,76 +113,73 @@
                         <div class="absolute inset-0 backface-hidden flex flex-col bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
                             
                             <div id="modo-codigo-panel" class="flex-1 flex flex-col w-full h-full">
-                                <div class="bg-slate-800 px-6 py-4 flex justify-between items-center border-b border-slate-900 shrink-0">
-                                    <span class="text-sm font-mono text-slate-300"><i class="fa-solid fa-terminal mr-2"></i>IDE: codigo_fuente.payl</span>
+                                <div class="bg-slate-900 px-6 py-4 flex justify-between items-center border-b border-slate-950 shrink-0">
+                                    <span class="text-sm font-mono text-slate-300"><i class="fa-solid fa-terminal mr-2 text-blue-400"></i>IDE: codigo_fuente.payl</span>
                                 </div>
                                 <textarea id="codigo" class="flex-1 w-full p-6 bg-slate-900 text-blue-300 font-mono text-base focus:outline-none resize-none leading-relaxed" spellcheck="false" placeholder="VAR salario_base = 4000;&#10;VAR ventas_mes = 2000;&#10;VAR bono;&#10;VAR total_pagar;&#10;&#10;INICIO&#10;  SI ventas_mes > 100 ENTONCES&#10;   bono = 1000;&#10;  SINO&#10;   bono = 0;&#10;  FIN SI;&#10;&#10;  total_pagar = salario_base + bono;&#10;FIN"></textarea>
                                 
-                                <div class="p-6 bg-slate-50 border-t border-slate-200 flex justify-between items-center shrink-0">
-                                    <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Motor Compilador</span>
-                                    <button onclick="iniciarEscaner(null)" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center hover:scale-105">
+                                <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end shrink-0">
+                                    <button onclick="iniciarEscaner()" id="btn-analizar-codigo" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg transition-all flex items-center hover:scale-105">
                                         <i class="fa-solid fa-play mr-2"></i> Compilar Código
                                     </button>
                                 </div>
                             </div>
 
-                            <div id="modo-grafico-panel" class="hidden flex-1 w-full flex-col bg-slate-50">
-                                <div class="bg-white px-6 py-4 flex justify-between items-center border-b border-slate-200 shrink-0">
-                                    <span class="text-sm font-bold text-slate-600"><i class="fa-solid fa-wand-magic-sparkles text-purple-500 mr-2"></i>Constructor Visual RRHH</span>
+                            <div id="modo-grafico-panel" class="hidden flex-1 w-full h-full flex-col bg-slate-50">
+                                <div class="bg-white px-6 py-5 flex justify-between items-center border-b border-slate-200 shrink-0 shadow-sm">
+                                    <span class="text-base font-black text-slate-700"><i class="fa-solid fa-wand-magic-sparkles text-purple-500 mr-2"></i>Constructor Visual RRHH</span>
                                 </div>
                                 
-                                <div class="flex-1 overflow-auto p-6 space-y-6">
-                                    <div class="bloque-grafico p-6 rounded-2xl">
-                                        <h3 class="font-black text-slate-800 mb-4 flex items-center"><div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3">1</div> Declaración de Variables</h3>
-                                        <div class="grid grid-cols-2 gap-4">
+                                <div class="flex-1 overflow-auto p-6 md:p-10 space-y-6">
+                                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                        <h3 class="font-black text-slate-800 mb-6 flex items-center text-lg"><div class="w-8 h-8 bg-blue-100 text-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-inner">1</div> Valores de Entrada</h3>
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                             <div>
-                                                <label class="etiqueta-visual">Salario Base (Obligatorio)</label>
+                                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Salario Base (Obligatorio)</label>
                                                 <div class="relative">
-                                                    <span class="absolute left-3 top-3 text-slate-400 font-bold">Q.</span>
-                                                    <input type="number" id="ui-salario" value="4000" class="input-visual pl-8 text-lg">
+                                                    <span class="absolute left-4 top-3 text-slate-400 font-bold">Q.</span>
+                                                    <input type="number" id="ui-salario" value="4000" class="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-10 pr-4 py-3 font-bold text-slate-700 outline-none transition-all">
                                                 </div>
                                             </div>
                                             <div>
-                                                <label class="etiqueta-visual">Ventas Registradas</label>
+                                                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 block">Ventas Registradas</label>
                                                 <div class="relative">
-                                                    <span class="absolute left-3 top-3 text-slate-400 font-bold">Q.</span>
-                                                    <input type="number" id="ui-ventas" value="2000" class="input-visual pl-8 text-lg">
+                                                    <span class="absolute left-4 top-3 text-slate-400 font-bold">Q.</span>
+                                                    <input type="number" id="ui-ventas" value="2000" class="w-full bg-slate-50 border border-slate-300 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 rounded-xl pl-10 pr-4 py-3 font-bold text-slate-700 outline-none transition-all">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
 
-                                    <div class="bloque-grafico bloque-grafico-condicion p-6 rounded-2xl">
-                                        <h3 class="font-black text-slate-800 mb-4 flex items-center"><div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mr-3">2</div> Regla de Bonificación</h3>
-                                        <div class="bg-slate-100 p-5 rounded-xl border border-slate-200 space-y-4">
-                                            <div class="flex items-center gap-3">
+                                    <div class="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:shadow-md transition-shadow">
+                                        <h3 class="font-black text-slate-800 mb-6 flex items-center text-lg"><div class="w-8 h-8 bg-emerald-100 text-emerald-600 rounded-lg flex items-center justify-center mr-3 shadow-inner">2</div> Regla de Bonificación</h3>
+                                        <div class="bg-slate-50 p-6 rounded-xl border border-slate-200 space-y-5">
+                                            <div class="flex items-center gap-4 flex-wrap">
                                                 <div class="bg-emerald-500 text-white font-black px-4 py-2 rounded-lg shadow-sm uppercase text-sm tracking-wide">Si</div>
                                                 <span class="font-medium text-slate-600">las ventas son mayores a:</span>
                                                 <div class="relative w-32">
-                                                    <span class="absolute left-3 top-2 text-slate-400 font-bold">Q.</span>
-                                                    <input type="number" id="ui-meta" value="100" class="input-visual pl-8">
+                                                    <span class="absolute left-3 top-2.5 text-slate-400 font-bold">Q.</span>
+                                                    <input type="number" id="ui-meta" value="100" class="w-full bg-white border border-slate-300 rounded-lg pl-8 pr-3 py-2 font-bold text-slate-700 outline-none">
                                                 </div>
                                             </div>
-                                            <div class="flex items-center gap-3 pl-8">
+                                            <div class="flex items-center gap-4 pl-4 md:pl-10 flex-wrap border-l-2 border-slate-300 ml-4">
                                                 <div class="bg-blue-500 text-white font-black px-4 py-2 rounded-lg shadow-sm uppercase text-sm tracking-wide">Entonces</div>
                                                 <span class="font-medium text-slate-600">otorgar un bono de:</span>
                                                 <div class="relative w-32">
-                                                    <span class="absolute left-3 top-2 text-emerald-500 font-bold">Q.</span>
-                                                    <input type="number" id="ui-bono" value="1000" class="input-visual pl-8 text-emerald-600">
+                                                    <span class="absolute left-3 top-2.5 text-emerald-500 font-bold">Q.</span>
+                                                    <input type="number" id="ui-bono" value="1000" class="w-full bg-white border border-emerald-300 focus:border-emerald-500 rounded-lg pl-8 pr-3 py-2 font-bold text-emerald-600 outline-none shadow-inner">
                                                 </div>
                                             </div>
-                                            <div class="flex items-center gap-3 pl-8 opacity-60">
+                                            <div class="flex items-center gap-4 pl-4 md:pl-10 flex-wrap border-l-2 border-slate-300 ml-4 opacity-60">
                                                 <div class="bg-slate-400 text-white font-black px-4 py-2 rounded-lg shadow-sm uppercase text-sm tracking-wide">Sino</div>
-                                                <span class="font-medium text-slate-600">el bono es automático de: <strong class="text-slate-800">Q. 0</strong></span>
+                                                <span class="font-medium text-slate-600">el bono es automático de: <strong class="text-slate-800 bg-white px-3 py-1 rounded border border-slate-200">Q. 0</strong></span>
                                             </div>
                                         </div>
                                     </div>
-                                    
-                                    </div>
+                                </div>
 
-                                <div class="p-6 bg-white border-t border-slate-200 flex justify-between items-center shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
-                                    <span class="text-xs text-slate-400 font-bold uppercase tracking-widest">Ejecución Limpia</span>
-                                    <button onclick="ejecutarNoCodeDirecto()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-4 px-10 rounded-xl shadow-xl shadow-emerald-600/30 transition-all flex items-center hover:scale-105">
+                                <div class="p-6 bg-white border-t border-slate-200 flex justify-end shrink-0 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)]">
+                                    <button onclick="ejecutarModoVisualDirecto()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-4 px-10 rounded-xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex items-center">
                                         Procesar Nómina <i class="fa-solid fa-arrow-right-long ml-3"></i>
                                     </button>
                                 </div>
@@ -227,9 +189,9 @@
                         </div>
 
                         <div class="absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden" id="borde-resultado-sintactico">
-                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0 z-50 relative">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center shrink-0 z-50 relative" id="header-trasero">
                                 <h3 id="titulo-panel-trasero" class="font-bold text-slate-700 uppercase tracking-wide"></h3>
-                                <button onclick="regresarEditor()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-1 rounded text-sm font-bold transition-all shadow-sm"><i class="fa-solid fa-rotate-left mr-1"></i> Modificar</button>
+                                <button onclick="regresarEditor()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-sm flex items-center"><i class="fa-solid fa-rotate-left mr-2"></i> Modificar</button>
                             </div>
                             <div class="flex-1 p-4 flex flex-col items-center justify-center overflow-auto bg-slate-50 w-full relative" id="resultado-sintactico-panel"></div>
                         </div>
@@ -243,10 +205,10 @@
                             <div class="px-6 py-4 border-b border-slate-800 bg-slate-950 flex justify-between items-center shrink-0">
                                 <span class="text-sm font-bold font-mono text-green-400"><i class="fa-solid fa-radar mr-2 fa-spin"></i>Terminal del Motor</span>
                             </div>
-                            <div class="flex-1 p-6 overflow-auto font-mono text-slate-500 text-base leading-relaxed" id="pantalla-escaner">
+                            <div class="flex-1 p-6 overflow-auto font-mono text-slate-400 text-base leading-relaxed" id="pantalla-escaner">
                                 <div class="flex flex-col h-full items-center justify-center opacity-30">
                                     <i class="fa-solid fa-code text-6xl mb-4"></i>
-                                    <p>Esperando ejecución...</p>
+                                    <p>Esperando compilación...</p>
                                 </div>
                             </div>
                             <div class="mt-auto shrink-0">
@@ -295,11 +257,11 @@
             <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
                 <i class="fa-solid fa-lock text-4xl text-slate-700"></i>
             </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-2">Autorización</h2>
-            <p class="text-slate-500 mb-8 text-sm">Credencial requerida para desembolsar.</p>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Autorización Bancaria</h2>
+            <p class="text-slate-500 mb-8 text-sm">Ingrese su clave corporativa para desembolsar.</p>
 
             <div class="text-left mb-6">
-                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Token Seguro:</label>
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Contraseña de Administrador:</label>
                 <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-2xl rounded-xl focus:ring-emerald-500 focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
             </div>
             
@@ -339,14 +301,14 @@
         let codigoRawFase2 = "";
         let nominaAprobada = false; 
 
-        // ==================== CAMBIO DE MODOS ====================
+        // ==================== GESTIÓN DE MODOS (CÓDIGO VS VISUAL) ====================
         function cambiarModo(modo) {
             const tabCod = document.getElementById('tab-codigo');
             const tabGraf = document.getElementById('tab-grafico');
             const panelCod = document.getElementById('modo-codigo-panel');
             const panelGraf = document.getElementById('modo-grafico-panel');
             
-            // Restablecemos el panel derecho si estábamos en el Dashboard
+            // Restablecer el layout por si regresan desde el dashboard
             document.getElementById('flipper-izquierdo').classList.remove('rotate-y-180');
             const grid = document.getElementById('main-grid'); 
             grid.classList.remove('grid-cols-1'); 
@@ -359,36 +321,38 @@
                 
                 panelCod.classList.remove('hidden'); 
                 panelCod.classList.add('flex');
-                
                 panelGraf.classList.add('hidden'); 
                 panelGraf.classList.remove('flex');
+                
             } else {
                 tabGraf.className = "px-5 py-2 text-sm font-bold text-white bg-emerald-600 rounded-md shadow transition-all flex items-center";
                 tabCod.className = "px-5 py-2 text-sm font-bold text-slate-500 hover:text-slate-800 rounded-md transition-all flex items-center";
                 
                 panelGraf.classList.remove('hidden'); 
                 panelGraf.classList.add('flex'); 
-                
                 panelCod.classList.add('hidden');
                 panelCod.classList.remove('flex');
+                
+                // En el modo visual, escondemos la terminal derecha desde el inicio para que sea "No-Code" puro.
+                grid.classList.remove('lg:grid-cols-2'); 
+                grid.classList.add('grid-cols-1');
+                document.getElementById('panel-derecho').classList.add('hidden');
             }
         }
 
-        // ==================== EJECUCIÓN PURA NO-CODE (MAGIA VISUAL) ====================
-        function ejecutarNoCodeDirecto() {
-            // Este modo salta todas las fases del compilador de cara al usuario.
-            // Es la experiencia "SaaS" final.
-            
+        // ==================== EJECUCIÓN NO-CODE (MAGIA VISUAL) ====================
+        function ejecutarModoVisualDirecto() {
+            // Obtenemos los valores visuales
             let sal = parseFloat(document.getElementById('ui-salario').value) || 0;
             let ven = parseFloat(document.getElementById('ui-ventas').value) || 0;
             let met = parseFloat(document.getElementById('ui-meta').value) || 0;
             let bon = parseFloat(document.getElementById('ui-bono').value) || 0;
             
-            // Calculamos la lógica que el usuario puso visualmente
+            // Calculamos en background
             let bonoReal = (ven > met) ? bon : 0;
             let total = sal + bonoReal;
             
-            // Llenamos la memoria RAM para que el Dashboard y el PDF funcionen perfecto
+            // Preparamos la memoria para el PDF y las tarjetas
             memoriaRAMGlobal = {
                 salario_base: { valor: sal, categoria: 'VAR' },
                 ventas_mes: { valor: ven, categoria: 'VAR' },
@@ -396,30 +360,28 @@
                 total_pagar: { valor: total, categoria: 'VAR' }
             };
             
-            nominaAprobada = false; // Reset de seguridad
+            nominaAprobada = false; 
             
-            // Mostramos un "Cargando" falso para que se sienta que el sistema está trabajando
+            // Ocultamos el header trasero de "Regresar/Modificar" temporalmente
+            document.getElementById('header-trasero').classList.add('hidden');
+            
+            // Giramos la tarjeta para mostrar la animación de carga
             document.getElementById('flipper-izquierdo').classList.add('rotate-y-180');
-            const grid = document.getElementById('main-grid'); 
-            grid.classList.remove('lg:grid-cols-2'); 
-            grid.classList.add('grid-cols-1');
-            document.getElementById('panel-derecho').classList.add('hidden');
-            
             const bordePanel = document.getElementById('borde-resultado-sintactico');
-            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-slate-50 rounded-2xl shadow-2xl border flex flex-col overflow-hidden";
+            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden";
             
-            document.getElementById('titulo-panel-trasero').innerHTML = `<i class="fa-solid fa-server mr-2 text-blue-500"></i> Sistema PayLogic Trabajando...`;
             const resultPanel = document.getElementById('resultado-sintactico-panel');
             
+            // Animación limpia y corporativa
             resultPanel.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full">
-                    <i class="fa-solid fa-gears text-6xl text-blue-500 animate-spin mb-6"></i>
-                    <h2 class="text-2xl font-bold text-slate-700">Compilando reglas visuales...</h2>
-                    <div class="w-64 mt-6"><div class="loader-bar"></div></div>
+                <div class="flex flex-col items-center justify-center h-full w-full bg-white fade-in">
+                    <div class="w-24 h-24 border-4 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-8"></div>
+                    <h2 class="text-3xl font-black text-slate-800 mb-2">Procesando Reglas de Negocio</h2>
+                    <p class="text-slate-500 font-medium">Conectando con el motor PayLogic...</p>
                 </div>
             `;
             
-            // A los 2 segundos, saltamos directo al Dashboard (Fase 4)
+            // A los 2 segundos, saltamos directo al Dashboard Final
             setTimeout(() => {
                 simularEjecucionVisual();
             }, 2000);
@@ -480,20 +442,26 @@
             return html;
         }
 
-        // ==================== FASE 1: LÉXICO ====================
+        // ==================== FASE 1: LÉXICO (MODO CÓDIGO) ====================
         async function iniciarEscaner() {
             const textareaElem = document.getElementById('codigo');
-            const codigoRaw = textareaElem.value || textareaElem.placeholder; // <-- TOMA EL PLACEHOLDER SI ESTÁ VACÍO
+            const codigoRaw = textareaElem.value || textareaElem.placeholder; 
             
             codigoRawFase2 = codigoRaw; 
             nominaAprobada = false; 
+            
+            document.getElementById('header-trasero').classList.remove('hidden'); // Asegurar que el header trasero se vea
+            
+            if (!codigoRaw.trim()) { 
+                alert("No hay código para analizar."); 
+                return; 
+            }
             
             document.getElementById('barra-control-fases').classList.add('hidden');
             document.getElementById('flipper-derecho').classList.remove('rotate-y-180');
             document.getElementById('flipper-izquierdo').classList.remove('rotate-y-180');
             
-            const btnAnalizar = document.querySelector('#modo-codigo-panel button');
-            
+            const btnAnalizar = document.getElementById('btn-analizar-codigo');
             btnAnalizar.disabled = true; 
             btnAnalizar.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-2"></i> Escaneando...';
             
@@ -671,7 +639,7 @@
             document.getElementById('titulo-panel-trasero').innerHTML = '<i class="fa-solid fa-network-wired mr-2 text-indigo-500"></i> Construcción de AST y BNF';
 
             if (resultadoSintacticoGlobal && resultadoSintacticoGlobal.exito) {
-                bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-xl shadow-2xl border-t-8 border-indigo-500 flex flex-col overflow-hidden";
+                bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border-t-8 border-indigo-500 flex flex-col overflow-hidden";
                 
                 let bnfRulesHTML = '<div class="opacity-50 transition-opacity duration-300" id="bnf-prog">&lt;Programa&gt; ::= &lt;Declaraciones&gt; INICIO &lt;Logica&gt; FIN</div>';
                 
@@ -692,14 +660,14 @@
                 }
 
                 resultPanel.innerHTML = `
-                    <div class="flex flex-col md:flex-row w-full h-full gap-4 overflow-hidden">
-                        <div class="w-full md:w-1/3 bg-[#0b1120] rounded-xl p-4 shadow-inner flex flex-col border border-slate-700">
-                            <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-widest border-b border-slate-700 pb-2"><i class="fa-solid fa-book mr-2"></i>Reglas BNF Aplicadas</h4>
-                            <div class="font-mono text-xs text-blue-300 space-y-3 overflow-auto" id="bnf-console">
+                    <div class="flex flex-col md:flex-row w-full h-full gap-6 overflow-hidden">
+                        <div class="w-full md:w-1/3 bg-[#0b1120] rounded-2xl p-6 shadow-inner flex flex-col border border-slate-700">
+                            <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-700 pb-3"><i class="fa-solid fa-book mr-2"></i>Reglas BNF Aplicadas</h4>
+                            <div class="font-mono text-sm text-blue-300 space-y-4 overflow-auto" id="bnf-console">
                                 ${bnfRulesHTML}
                             </div>
                         </div>
-                        <div class="w-full md:w-2/3 bg-slate-50 rounded-xl border border-slate-200 p-6 overflow-auto shadow-inner relative flex justify-center">
+                        <div class="w-full md:w-2/3 bg-slate-50 rounded-2xl border border-slate-200 p-6 overflow-auto shadow-inner relative flex justify-center">
                             <div class="ast-tree w-max min-w-full"><ul>${construirArbolHTML(resultadoSintacticoGlobal.ast)}</ul></div>
                         </div>
                     </div>`;
@@ -707,7 +675,7 @@
                 setTimeout(() => { animarConstruccionArbol(); }, 500);
             } else {
                 let msjError = resultadoSintacticoGlobal ? resultadoSintacticoGlobal.mensaje : "Estructura inválida.";
-                bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-xl shadow-2xl border-t-8 border-red-500 flex flex-col overflow-hidden";
+                bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border-t-8 border-red-500 flex flex-col overflow-hidden";
                 
                 resultPanel.innerHTML = `
                     <div class="w-full h-full flex flex-col items-center justify-center p-6">
@@ -913,23 +881,23 @@
 
             resultPanel.innerHTML = `
                 <div class="flex-1 flex flex-col md:flex-row w-full gap-6 overflow-hidden px-4 pb-4 mt-2">
-                    <div class="flex-1 bg-[#0b1120] rounded-xl p-5 overflow-auto text-left shadow-2xl border-2 border-slate-800 flex flex-col">
-                        <h4 class="text-xs font-bold text-slate-400 mb-3 uppercase tracking-widest border-b border-slate-700 pb-2">
+                    <div class="flex-1 bg-[#0b1120] rounded-2xl p-6 overflow-auto text-left shadow-2xl border border-slate-700 flex flex-col">
+                        <h4 class="text-xs font-bold text-slate-400 mb-4 uppercase tracking-widest border-b border-slate-700 pb-3">
                             <i class="fa-solid fa-terminal mr-2"></i>Consola Ejecución
                         </h4>
-                        <div id="consola-semantica" class="font-mono text-sm space-y-2 flex-1 overflow-auto pr-2 text-slate-300"></div>
+                        <div id="consola-semantica" class="font-mono text-sm space-y-3 flex-1 overflow-auto pr-2 text-slate-300"></div>
                     </div>
-                    <div class="flex-1 bg-white rounded-xl border-2 border-slate-200 p-0 overflow-hidden shadow-xl flex flex-col">
-                        <div class="bg-slate-100 px-5 py-3 border-b border-slate-200">
+                    <div class="flex-1 bg-white rounded-2xl border border-slate-200 p-0 overflow-hidden shadow-xl flex flex-col">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200">
                             <h4 class="text-xs font-bold text-slate-600 uppercase tracking-widest"><i class="fa-solid fa-table-cells mr-2"></i>Tabla de Símbolos</h4>
                         </div>
-                        <div class="flex-1 overflow-auto p-4 bg-slate-50">
+                        <div class="flex-1 overflow-auto p-6 bg-slate-50/50">
                             <table class="w-full text-left border-collapse">
                                 <thead class="bg-slate-200 text-slate-600 text-xs uppercase tracking-wider">
                                     <tr>
-                                        <th class="px-4 py-3 font-bold">Identificador</th>
-                                        <th class="px-4 py-3 font-bold">Cat.</th>
-                                        <th class="px-4 py-3 font-bold">Valor</th>
+                                        <th class="px-5 py-3 font-bold rounded-tl-lg">Identificador</th>
+                                        <th class="px-5 py-3 font-bold">Cat.</th>
+                                        <th class="px-5 py-3 font-bold rounded-tr-lg">Valor</th>
                                     </tr>
                                 </thead>
                                 <tbody id="tabla-simbolos-body" class="divide-y divide-slate-200 text-sm font-mono text-slate-700"></tbody>
@@ -946,7 +914,7 @@
             let resultadoSemantico = procesarSemantica(resultadoSintacticoGlobal.ast);
             memoriaRAMGlobal = resultadoSemantico.memoriaFinal;
 
-            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-xl shadow-2xl border-t-8 border-emerald-500 flex flex-col overflow-hidden transition-colors duration-500";
+            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border-t-8 border-emerald-500 flex flex-col overflow-hidden transition-colors duration-500";
             let ultimaTabla = [];
 
             for (let paso of resultadoSemantico.pasos) {
@@ -964,10 +932,10 @@
                     let claseValor = (simboloPrevio && simboloPrevio.valor !== simbolo.valor) ? 'valor-actualizado' : '';
                     let badgeCat = simbolo.categoria === "CONST" ? "bg-amber-100 text-amber-800" : "bg-purple-100 text-purple-800";
                     
-                    filasHTML += `<tr class="bg-white hover:bg-slate-50">
-                        <td class="px-4 py-3 font-bold text-slate-800">${escapeHTML(simbolo.id)}</td>
-                        <td class="px-4 py-3"><span class="px-2 py-1 rounded text-xs font-bold ${badgeCat}">${simbolo.categoria}</span></td>
-                        <td class="px-4 py-3 text-lg ${claseValor}">${escapeHTML(simbolo.valor)}</td>
+                    filasHTML += `<tr class="bg-white hover:bg-slate-50 transition-colors">
+                        <td class="px-5 py-4 font-bold text-slate-800">${escapeHTML(simbolo.id)}</td>
+                        <td class="px-5 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold ${badgeCat}">${simbolo.categoria}</span></td>
+                        <td class="px-5 py-4 text-lg ${claseValor}">${escapeHTML(simbolo.valor)}</td>
                     </tr>`;
                 });
                 
@@ -1004,7 +972,9 @@
             const resultPanel = document.getElementById('resultado-sintactico-panel');
             const bordePanel = document.getElementById('borde-resultado-sintactico');
             
-            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-slate-50 rounded-2xl shadow-2xl border flex flex-col overflow-hidden transition-colors duration-500";
+            document.getElementById('header-trasero').classList.add('hidden'); // Ocultar header para que la animación sea más limpia
+            
+            bordePanel.className = "absolute inset-0 backface-hidden rotate-y-180 bg-white rounded-2xl shadow-2xl border flex flex-col overflow-hidden transition-colors duration-500";
             
             let contextoLlaves = Object.keys(memoriaRAMGlobal).join(" ").toLowerCase();
             let esVentas = contextoLlaves.includes("venta") || contextoLlaves.includes("comision") || contextoLlaves.includes("bono");
@@ -1015,28 +985,26 @@
             let iconoDerecha = esVentas ? "fa-chart-pie" : "fa-user-tie";
             let textoDerecha = esVentas ? "Métricas DB" : "Empleado";
 
-            document.getElementById('titulo-panel-trasero').innerHTML = `<i class="fa-solid ${esVentas ? 'fa-chart-line' : 'fa-building-columns'} mr-2 text-amber-500"></i> Sistema PayLogic`;
-
             resultPanel.innerHTML = `
-                <div id="animacion-contexto" class="flex flex-col items-center justify-center h-full w-full">
-                    <h3 class="text-2xl font-bold text-slate-700 mb-12 animate-pulse text-center">${tituloAnimacion}</h3>
-                    <div class="flex items-center justify-between w-full max-w-2xl px-10 relative">
+                <div id="animacion-contexto" class="flex flex-col items-center justify-center h-full w-full bg-slate-50 rounded-2xl fade-in">
+                    <h3 class="text-2xl font-black text-slate-700 mb-16 animate-pulse text-center">${tituloAnimacion}</h3>
+                    <div class="flex items-center justify-between w-full max-w-3xl px-10 relative">
                         <div class="flex flex-col items-center z-10">
-                            <i class="fa-solid ${iconoIzquierda} text-7xl text-slate-800 bg-white p-6 rounded-3xl shadow-lg border border-slate-200"></i>
-                            <p class="font-bold text-slate-600 mt-4 uppercase tracking-widest text-sm">${textoIzquierda}</p>
+                            <i class="fa-solid ${iconoIzquierda} text-7xl text-slate-800 bg-white p-6 rounded-3xl shadow-xl border border-slate-200"></i>
+                            <p class="font-bold text-slate-600 mt-6 uppercase tracking-widest text-sm">${textoIzquierda}</p>
                         </div>
-                        <div class="absolute left-1/2 -translate-x-1/2 w-full max-w-md h-full overflow-hidden flex items-center">
+                        <div class="absolute left-1/2 -translate-x-1/2 w-full max-w-lg h-full overflow-hidden flex items-center">
                             <i class="fa-solid fa-money-bill-wave text-5xl text-emerald-500 animate-flow" style="animation-delay: 0s;"></i>
                             <i class="fa-solid ${esVentas ? 'fa-cart-shopping' : 'fa-coins'} text-4xl text-amber-500 animate-flow" style="animation-delay: 0.5s;"></i>
                             <i class="fa-solid fa-sack-dollar text-5xl text-emerald-600 animate-flow" style="animation-delay: 1s;"></i>
                         </div>
                         <div class="flex flex-col items-center z-10">
-                            <i class="fa-solid ${iconoDerecha} text-7xl text-blue-600 bg-white p-6 rounded-3xl shadow-lg border border-slate-200"></i>
-                            <p class="font-bold text-blue-700 mt-4 uppercase tracking-widest text-sm">${textoDerecha}</p>
+                            <i class="fa-solid ${iconoDerecha} text-7xl text-blue-600 bg-white p-6 rounded-3xl shadow-xl border border-slate-200"></i>
+                            <p class="font-bold text-blue-700 mt-6 uppercase tracking-widest text-sm">${textoDerecha}</p>
                         </div>
                     </div>
                 </div>
-                <div id="resultado-final-tarjetas" class="hidden w-full max-w-4xl flex-col px-4 pb-8 mt-4"></div>
+                <div id="resultado-final-tarjetas" class="hidden w-full h-full flex-col bg-slate-50 relative"></div>
             `;
 
             setTimeout(() => {
@@ -1079,41 +1047,56 @@
                 }
                 
                 tarjetasHTML += `
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-md flex items-center justify-between hover:scale-105 transition-transform">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md flex items-center justify-between hover:scale-105 transition-transform">
                         <div>
-                            <h4 class="text-sm font-bold text-slate-500 mb-1">${textoAmigable}</h4>
-                            <p class="text-3xl font-black text-slate-800">Q. ${escapeHTML(varData.valor)}</p>
+                            <h4 class="text-sm font-bold text-slate-500 mb-1 uppercase tracking-wide">${textoAmigable}</h4>
+                            <p class="text-4xl font-black text-slate-800">Q. ${escapeHTML(varData.valor)}</p>
                         </div>
-                        <div class="w-14 h-14 bg-slate-50 rounded-xl flex items-center justify-center text-2xl shadow-inner border border-slate-100">
+                        <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center text-3xl shadow-inner border border-slate-100">
                             <i class="fa-solid ${icon}"></i>
                         </div>
                     </div>
                 `;
             }
 
+            // BOTONES DE IMPLEMENTACIÓN INCLUIDOS AQUÍ
             tarjetasContenedor.innerHTML = `
-                <div class="text-center mb-8">
-                    <div class="w-20 h-20 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-inner">
-                        <i class="fa-solid fa-file-invoice-dollar text-4xl text-amber-500"></i>
+                <div class="absolute top-4 right-4 z-50">
+                    <button onclick="regresarEditor()" class="bg-white hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition-all shadow-sm border border-slate-200 flex items-center">
+                        <i class="fa-solid fa-rotate-left mr-2"></i> Nuevo
+                    </button>
+                </div>
+                
+                <div class="flex-1 overflow-auto p-10 flex flex-col">
+                    <div class="text-center mb-10">
+                        <div class="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner">
+                            <i class="fa-solid fa-file-invoice-dollar text-5xl text-blue-600"></i>
+                        </div>
+                        <h2 class="text-4xl font-black text-slate-800 mb-2">Nómina Procesada</h2>
+                        <p class="text-slate-500 text-lg">Los montos están listos para ser asignados o exportados.</p>
                     </div>
-                    <h2 class="text-3xl font-black text-slate-800">Nómina Procesada</h2>
-                    <p class="text-slate-500 mt-2 font-medium">Los montos están listos para ser asignados o exportados como reporte PDF.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-10">
-                    ${tarjetasHTML}
-                </div>
-                <div class="flex justify-center gap-4 mt-auto flex-wrap">
-                    <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg transition-transform hover:scale-105 flex items-center">
-                        <i class="fa-solid fa-file-signature mr-2 text-xl"></i> Autorizar y Emitir
-                    </button>
-                    <button id="btn-pdf" onclick="descargarPDF()" class="bg-slate-300 text-slate-500 font-bold py-4 px-8 rounded-xl shadow transition-all flex items-center cursor-not-allowed">
-                        <i class="fa-solid fa-lock mr-2 text-xl" id="icon-pdf"></i> PDF Informe
-                    </button>
                     
-                    <div class="w-full flex justify-center mt-6">
-                        <a href="implementacion.html" class="bg-purple-600 hover:bg-purple-700 text-white font-black text-lg py-4 px-10 rounded-2xl shadow-xl shadow-purple-600/30 transition-transform hover:scale-105 border border-purple-400 flex items-center">
-                            <i class="fa-solid fa-rocket mr-3"></i> Opciones de Implementación
-                        </a>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-4xl mx-auto mb-12">
+                        ${tarjetasHTML}
+                    </div>
+                    
+                    <div class="mt-auto max-w-4xl w-full mx-auto">
+                        <div class="flex flex-wrap justify-center gap-4 mb-6">
+                            <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-5 px-8 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
+                                <i class="fa-solid fa-file-signature mr-3"></i> Autorizar y Emitir
+                            </button>
+                            <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 min-w-[200px] bg-slate-200 text-slate-400 font-black text-lg py-5 px-8 rounded-2xl shadow-sm transition-all flex justify-center items-center cursor-not-allowed border border-slate-300">
+                                <i class="fa-solid fa-lock mr-3" id="icon-pdf"></i> PDF Informe
+                            </button>
+                        </div>
+                        
+                        <div class="w-full mt-8 border-t border-slate-200 pt-8">
+                            <h4 class="text-center text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Siguientes Pasos (B2B)</h4>
+                            <a href="implementacion.html" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-lg py-5 rounded-2xl shadow-2xl transition-transform hover:scale-105 flex justify-center items-center relative overflow-hidden group">
+                                <div class="absolute inset-0 w-1/4 h-full bg-white/10 skew-x-12 -translate-x-full group-hover:animate-[loading_1.5s_ease-in-out_infinite]"></div>
+                                <i class="fa-solid fa-rocket mr-3 text-purple-400"></i> Ver Opciones de Implementación en su ERP
+                            </a>
+                        </div>
                     </div>
                 </div>
             `;
@@ -1179,35 +1162,37 @@
 
             setTimeout(() => {
                 btn.innerHTML = '<i class="fa-solid fa-check-double mr-3 text-xl"></i> Aprobado';
-                btn.classList.replace('bg-emerald-600', 'bg-slate-600');
-                btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-700');
+                btn.classList.replace('bg-emerald-600', 'bg-slate-300');
+                btn.classList.replace('hover:bg-emerald-700', 'hover:bg-slate-300');
+                btn.classList.replace('text-white', 'text-slate-500');
                 
                 nominaAprobada = true;
                 
                 const btnPdf = document.getElementById('btn-pdf');
-                btnPdf.classList.replace('bg-slate-300', 'bg-blue-600');
-                btnPdf.classList.replace('text-slate-500', 'text-white');
+                btnPdf.classList.replace('bg-slate-200', 'bg-blue-600');
+                btnPdf.classList.replace('text-slate-400', 'text-white');
                 btnPdf.classList.replace('cursor-not-allowed', 'hover:bg-blue-700');
-                btnPdf.classList.replace('shadow', 'shadow-xl');
-                btnPdf.classList.add('hover:scale-105');
-                document.getElementById('icon-pdf').className = "fa-solid fa-file-pdf mr-2 text-xl";
+                btnPdf.classList.replace('shadow-sm', 'shadow-xl');
+                btnPdf.classList.add('hover:scale-105', 'shadow-blue-600/30');
+                btnPdf.classList.replace('border-slate-300', 'border-blue-600');
+                document.getElementById('icon-pdf').className = "fa-solid fa-file-pdf mr-3 text-xl";
                 
                 let total = memoriaRAMGlobal['total_pagar']?.valor || memoriaRAMGlobal['salario_final']?.valor || "0";
                 confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
                 
                 mostrarModal(
                     'Aprobación Exitosa', 
-                    `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total} a la cuenta del EMPLEADO. El expediente ha sido cerrado de manera oficial.`, 
+                    `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total} a la cuenta del USUARIO. El expediente ha sido cerrado de manera oficial.`, 
                     'fa-stamp', 
                     'text-emerald-600', 
                     'bg-emerald-100', 
-                    'Cerrar Expediente <i class="fa-solid fa-lock ml-2"></i>', 
+                    'Descargar PDF <i class="fa-solid fa-download ml-2"></i>', 
                     'cerrarModal()'
                 );
             }, 1500);
         }
 
-        // ==================== FUNCION DESCARGAR PDF TIPO BANCO INDUSTRIAL ====================
+        // ==================== FUNCION DESCARGAR PDF ====================
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Debe autorizar y emitir la nómina mediante Firma Electrónica antes de poder generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
@@ -1367,99 +1352,6 @@
             };
 
             html2pdf().set(opt).from(htmlReporte).save();
-        }
-
-        // ==================== FUNCIONES DE REINICIO ====================
-        function regresarEditor() {
-            nominaAprobada = false; 
-            
-            document.getElementById('tab-codigo').parentElement.parentElement.classList.remove('opacity-50', 'pointer-events-none');
-            document.getElementById('flipper-izquierdo').classList.remove('rotate-y-180');
-            
-            setTimeout(() => {
-                document.getElementById('codigo-animado').classList.add('hidden'); 
-                
-                if(document.getElementById('tab-codigo').classList.contains('bg-blue-600')) {
-                    document.getElementById('codigo').classList.remove('hidden');
-                } else {
-                    document.getElementById('modo-grafico-panel').classList.remove('hidden');
-                    document.getElementById('modo-grafico-panel').classList.add('flex');
-                }
-
-                document.getElementById('footer-editor').classList.remove('hidden'); 
-                document.getElementById('barra-control-fases').classList.add('hidden');
-                
-                const grid = document.getElementById('main-grid'); 
-                grid.classList.remove('grid-cols-1'); 
-                grid.classList.add('lg:grid-cols-2');
-                
-                const panelDerecho = document.getElementById('panel-derecho'); 
-                panelDerecho.classList.remove('hidden');
-                
-                setTimeout(() => { panelDerecho.classList.remove('opacity-0'); }, 50);
-            }, 600); 
-        }
-
-        function llenarTabla(tokens) {
-            const ct = document.getElementById('cuerpo-tabla'); 
-            ct.innerHTML = ''; 
-            
-            if(!tokens) return;
-            
-            tokens.forEach((t, index) => {
-                let tipoT = t.token || t.tipo || "DESCONOCIDO"; 
-                let valT = t.lexema || t.valor || ""; 
-                let cb = "bg-slate-100 text-slate-700";
-                
-                if (tipoT === 'PALABRA_RESERVADA') cb = "bg-blue-100 text-blue-800 border border-blue-200"; 
-                else if (tipoT === 'IDENTIFICADOR') cb = "bg-purple-100 text-purple-800 border border-purple-200"; 
-                else if (tipoT === 'NUMERO') cb = "bg-amber-100 text-amber-800 border border-amber-200"; 
-                else if (tipoT.includes('OP_')) cb = "bg-rose-100 text-rose-800 border border-rose-200";
-                
-                ct.innerHTML += `<tr class="hover:bg-slate-50 transition-colors">
-                    <td class="px-6 py-3 font-medium text-slate-400">${index + 1}</td>
-                    <td class="px-6 py-3 font-mono font-bold text-slate-700">${escapeHTML(valT)}</td>
-                    <td class="px-6 py-3"><span class="px-3 py-1 rounded-full text-xs font-bold ${cb}">${tipoT}</span></td>
-                </tr>`;
-            });
-        }
-
-        function crearGrafica(tokens) {
-            const ctx = document.getElementById('graficaTokens').getContext('2d');
-            let conteo = {}; 
-            
-            if(tokens) { 
-                tokens.forEach(t => { 
-                    let tType = t.token || t.tipo || "DESCONOCIDO"; 
-                    conteo[tType] = (conteo[tType] || 0) + 1; 
-                }); 
-            }
-            
-            const etiquetas = Object.keys(conteo); 
-            const valores = Object.values(conteo);
-            
-            const coloresHex = etiquetas.map(tipo => {
-                if (tipo === 'PALABRA_RESERVADA') return '#3b82f6'; 
-                if (tipo === 'IDENTIFICADOR') return '#a855f7';
-                if (tipo === 'NUMERO') return '#f59e0b'; 
-                if (tipo.includes('OP_')) return '#f43f5e'; 
-                return '#94a3b8';
-            });
-            
-            if (graficaActual) graficaActual.destroy();
-            
-            graficaActual = new Chart(ctx, { 
-                type: 'doughnut', 
-                data: { 
-                    labels: etiquetas, 
-                    datasets: [{ data: valores, backgroundColor: coloresHex, borderWidth: 2, borderColor: '#ffffff' }] 
-                }, 
-                options: { 
-                    responsive: true, 
-                    maintainAspectRatio: false, 
-                    plugins: { legend: { position: 'right' } } 
-                } 
-            });
         }
     </script>
 </body>
