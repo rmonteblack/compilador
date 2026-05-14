@@ -163,6 +163,14 @@
                 <i class="fa-solid fa-plug w-6 text-center mr-2"></i> Implementación
             </a>
         </nav>
+        <div class="p-6 border-t border-slate-700 bg-slate-950">
+            <div class="flex items-center">
+                <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center text-sm font-black shadow-inner">UMG</div>
+                <div class="ml-3">
+                    <p class="text-sm font-bold text-white">Ing. en Sistemas</p>
+                </div>
+            </div>
+        </div>
     </aside>
 
     <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
@@ -230,10 +238,10 @@
                     <div>
                         <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Comparadores Lógicos</span>
                         <div class="flex flex-wrap gap-2">
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor que (>)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor que (<)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">=" data-type="comp">Mayor o Igual (>=)</div>
-                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<=" data-type="comp">Menor o Igual (<=)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor que (&gt;)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor que (&lt;)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">=" data-type="comp">Mayor o Igual (&gt;=)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<=" data-type="comp">Menor o Igual (&lt;=)</div>
                             <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="==" data-type="comp">Igualdad (==)</div>
                         </div>
                     </div>
@@ -292,7 +300,7 @@
                                 <i class="fa-solid fa-file-invoice-dollar text-6xl text-blue-600"></i>
                             </div>
                             <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-3 tracking-tight">Nómina Procesada</h2>
-                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados visualmente.</p>
+                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados y listos para desembolso corporativo.</p>
                         </div>
                         
                         <div id="contenedor-tarjetas" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12">
@@ -348,7 +356,7 @@
     </div>
 
     <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
-        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-lg w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
             <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-3xl"></i></button>
             <div id="modal-icon-bg" class="w-28 h-28 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner"><i id="modal-icon" class=""></i></div>
             <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-4"></h2>
@@ -364,7 +372,15 @@
         let memoriaRAMGlobal = {}; 
         let nominaAprobada = false;
 
-        // ==================== LÓGICA DRAG & DROP ====================
+        // Función auxiliar para escapar el HTML en el Javascript y que no se rompa el "<" y ">"
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({ 
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' 
+            }[tag]));
+        }
+
+        // ==================== 1. CREADOR DE VARIABLES Y NÚMEROS ====================
         function crearVarVisual() {
             let nameInput = document.getElementById('var-name').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
             let valInput = document.getElementById('var-val').value.trim();
@@ -407,7 +423,7 @@
             });
         }
 
-        // --- Eventos D&D nativos ---
+        // ==================== 2. EVENTOS DRAG & DROP ====================
         function drag(ev) {
             ev.dataTransfer.setData("val", ev.target.getAttribute('data-val'));
             ev.dataTransfer.setData("type", ev.target.getAttribute('data-type'));
@@ -464,8 +480,9 @@
                 return; 
             }
 
-            // Llenar el Dropzone
-            el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer hover:scale-95" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${val}</div>`;
+            // Llenar el Dropzone escapando el HTML para no romper los símbolos < y >
+            let displayVal = escapeHTML(val);
+            el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer hover:scale-95" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${displayVal}</div>`;
             el.setAttribute('data-filled', val);
             el.classList.add('filled');
         }
@@ -476,7 +493,7 @@
             el.classList.remove('filled');
         }
 
-        // ==================== CREADOR DE FILAS (LIENZO) ====================
+        // ==================== 3. CREADOR DE PLANTILLAS EN EL LIENZO ====================
         function addCalcRow() {
             document.getElementById('canvas-empty').style.display = 'none';
             const area = document.getElementById('canvas-area');
@@ -530,7 +547,7 @@
             area.appendChild(row);
         }
 
-        // ==================== PROCESADOR NO-CODE A CÓDIGO Y EJECUCIÓN ====================
+        // ==================== 4. PROCESADOR NO-CODE A CÓDIGO ====================
         function procesarNoCode() {
             if (visualVars.length === 0) {
                 mostrarModal('Faltan Variables', 'Debes crear e inyectar al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
@@ -581,7 +598,7 @@
             code += "FIN";
 
             if (hasEmpty) {
-                mostrarModal('Bloques Incompletos', 'Hay huecos vacíos en el lienzo. Arrastra las piezas correctas de la Paleta para completarlos.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Bloques Incompletos', 'Hay huecos vacíos en el lienzo. Arrastra las piezas correctas de la Paleta.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
                 return;
             }
 
@@ -590,7 +607,7 @@
             document.getElementById('vista-cargando').classList.remove('hidden');
             document.getElementById('vista-cargando').classList.add('flex', 'fade-in');
 
-            // Evaluar lógica en background (Simula el envío al backend)
+            // Intérprete JS local para procesar el código resultante
             setTimeout(() => {
                 ejecutarSilenciosoLocal(code);
             }, 2500);
@@ -619,7 +636,6 @@
                     else if (trim.startsWith('SI')) {
                         inIf = true;
                         let condStr = trim.replace('SI', '').replace('ENTONCES', '').trim();
-                        // El split asume espacios entre los bloques: "ventas > 100" o "ventas == 100"
                         let parts = condStr.split(' '); 
                         
                         let v1Str = parts[0];
@@ -629,7 +645,6 @@
                         let v1 = isNaN(v1Str) ? parseFloat(memoriaRAMGlobal[v1Str].valor) : parseFloat(v1Str);
                         let v2 = isNaN(v2Str) ? parseFloat(memoriaRAMGlobal[v2Str].valor) : parseFloat(v2Str);
                         
-                        // Evaluador de Comparadores actualizado
                         if(opStr === '>') ifConditionTrue = v1 > v2;
                         if(opStr === '<') ifConditionTrue = v1 < v2;
                         if(opStr === '>=') ifConditionTrue = v1 >= v2;
@@ -654,7 +669,6 @@
                         let target = assignSplit[0].trim();
                         let expr = assignSplit[1].trim();
                         
-                        // Detectar si hay matemática (+ - * /)
                         let opMatch = expr.match(/([\w\d_]+)\s*([\+\-\*\/])\s*([\w\d_]+)/);
                         if (opMatch) {
                             let n1Str = opMatch[1];
@@ -672,7 +686,6 @@
                             
                             memoriaRAMGlobal[target].valor = res;
                         } else {
-                            // Asignación simple: bono = 1000
                             let n1 = isNaN(expr) ? parseFloat(memoriaRAMGlobal[expr].valor) : parseFloat(expr);
                             memoriaRAMGlobal[target].valor = n1;
                         }
@@ -693,7 +706,7 @@
                 document.getElementById('vista-cargando').classList.add('hidden');
                 document.getElementById('vista-cargando').classList.remove('flex');
                 document.getElementById('vista-lienzo').classList.remove('hidden');
-                mostrarModal('Error de Lógica', 'La lógica financiera contiene errores. Revisa que todas las variables utilizadas hayan sido creadas y arrastradas correctamente.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
+                mostrarModal('Error de Lógica', 'La lógica contiene errores. Revisa que todas las variables utilizadas hayan sido creadas y arrastradas correctamente.', 'fa-triangle-exclamation', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
             }
         }
 
@@ -825,7 +838,7 @@
             }, 1500);
         }
 
-        // ==================== GENERACIÓN DE PDF CORPORATIVO ====================
+        // Generar PDF corporativo
         function descargarPDF() {
             if (!nominaAprobada) {
                 mostrarModal('Acción Denegada', 'Debe autorizar la nómina mediante Firma Electrónica antes de generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
