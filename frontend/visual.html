@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayLogic | Motor Visual (No-Code)</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        .fade-in { animation: fadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(20px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .loader-bar { width: 100%; height: 6px; background: #e2e8f0; overflow: hidden; border-radius: 3px; }
+        .loader-bar::after { content: ''; display: block; width: 40%; height: 100%; background: #10b981; animation: loading 1s infinite ease-in-out; }
+        @keyframes loading { 0% { transform: translateX(-100%); } 100% { transform: translateX(300%); } }
+
+        .bg-pattern {
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+            background-size: 24px 24px;
+        }
+        
+        .hide-scroll::-webkit-scrollbar { display: none; }
+
+        /* Estilos DRAG AND DROP */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 800;
+            font-size: 0.875rem;
+            color: white;
+            cursor: grab;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            user-select: none;
+            transition: transform 0.1s;
+        }
+        .pill:active { cursor: grabbing; transform: scale(0.95); }
+        
+        .pill-var { background-color: #3b82f6; }
+        .pill-num { background-color: #f59e0b; }
+        .pill-op { background-color: #8b5cf6; }
+        .pill-comp { background-color: #ec4899; }
+        
+        .dropzone {
+            display: inline-flex;
+            min-width: 80px;
+            height: 36px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 9999px;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8fafc;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            margin: 0 0.25rem;
+            vertical-align: middle;
+        }
+        .dropzone.drag-over {
+            background-color: #e0f2fe;
+            border-color: #3b82f6;
+            border-style: solid;
+        }
+        .dropzone.filled {
+            border: none;
+            background: transparent;
+            min-width: auto;
+            padding: 0;
+        }
+        
+        .logic-row {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen flex overflow-hidden font-sans text-slate-800 relative bg-pattern">
+
+    <aside class="w-64 bg-slate-900 text-white flex flex-col hidden md:flex shadow-2xl z-20 shrink-0">
+        <div class="h-16 flex items-center px-6 border-b border-slate-700 shrink-0">
+            <i class="fa-solid fa-bolt text-blue-400 text-xl mr-3"></i>
+            <h1 class="text-xl font-bold tracking-wider">PayLogic<span class="text-blue-400">.</span></h1>
+        </div>
+        <nav class="flex-1 px-4 py-8 space-y-3">
+            <a href="presentacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-folder-open w-6 text-center mr-2"></i> Documentación
+            </a>
+            <a href="index.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-code w-6 text-center mr-2"></i> Motor Código
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 bg-emerald-600 text-white rounded-xl shadow-lg shadow-emerald-900/50 transition-all">
+                <i class="fa-solid fa-shapes w-6 text-center mr-2"></i> Motor Visual
+            </a>
+            <a href="implementacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-plug w-6 text-center mr-2"></i> Implementación
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <header class="h-16 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200 flex items-center justify-between px-8 z-10 shrink-0">
+            <h2 class="text-lg font-black text-slate-800 tracking-tight"><i class="fa-solid fa-wand-magic-sparkles text-emerald-500 mr-2"></i> Entorno Visual No-Code (RRHH)</h2>
+            <div class="flex items-center gap-3">
+                <button onclick="procesarNoCode()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-black py-2 px-6 rounded-xl shadow-lg shadow-emerald-600/30 transition-transform hover:scale-105 flex items-center">
+                    Procesar Nómina <i class="fa-solid fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 flex overflow-hidden">
+            
+            <div class="w-80 bg-white border-r border-slate-200 shadow-xl z-10 flex flex-col hide-scroll overflow-auto">
+                <div class="p-6 border-b border-slate-100">
+                    <h3 class="font-black text-slate-800 mb-4"><i class="fa-solid fa-cube text-blue-500 mr-2"></i> 1. Crear Variables</h3>
+                    <div class="space-y-3">
+                        <input type="text" id="var-name" placeholder="Nombre (ej. salario)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500">
+                        <input type="number" id="var-val" placeholder="Valor (ej. 4000)" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-bold outline-none focus:border-blue-500">
+                        <button onclick="crearVarVisual()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded-lg text-sm transition-colors">Añadir Variable</button>
+                    </div>
+                </div>
+
+                <div class="p-6 border-b border-slate-100">
+                    <h3 class="font-black text-slate-800 mb-4"><i class="fa-solid fa-toolbox text-emerald-500 mr-2"></i> Paleta de Bloques</h3>
+                    <p class="text-xs text-slate-500 mb-4">Arrastra estos bloques al lienzo.</p>
+                    
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Variables Creadas</span>
+                        <div id="palette-vars" class="flex flex-wrap gap-2 min-h-[30px]">
+                            </div>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Números Fijos</span>
+                        <div class="flex gap-2 mb-2">
+                            <input type="number" id="num-val" placeholder="0" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-2 py-1 text-sm font-bold outline-none">
+                            <button onclick="crearNumVisual()" class="bg-amber-500 text-white px-3 rounded-lg font-bold"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                        <div id="palette-nums" class="flex flex-wrap gap-2 min-h-[30px]"></div>
+                    </div>
+
+                    <div class="mb-4">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Operadores Matemáticos</span>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="pill pill-op" draggable="true" ondragstart="drag(event)" data-val="+" data-type="op"><i class="fa-solid fa-plus mr-1"></i> Sumar</div>
+                            <div class="pill pill-op" draggable="true" ondragstart="drag(event)" data-val="-" data-type="op"><i class="fa-solid fa-minus mr-1"></i> Restar</div>
+                            <div class="pill pill-op" draggable="true" ondragstart="drag(event)" data-val="*" data-type="op"><i class="fa-solid fa-xmark mr-1"></i> Multiplicar</div>
+                            <div class="pill pill-op" draggable="true" ondragstart="drag(event)" data-val="/" data-type="op"><i class="fa-solid fa-divide mr-1"></i> Dividir</div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest block mb-2">Comparadores Lógicos</span>
+                        <div class="flex flex-wrap gap-2">
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val=">" data-type="comp">Mayor a (>)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="<" data-type="comp">Menor a (<)</div>
+                            <div class="pill pill-comp" draggable="true" ondragstart="drag(event)" data-val="==" data-type="comp">Igual a (==)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 overflow-auto p-8 relative" id="vista-lienzo">
+                <div class="max-w-4xl mx-auto h-full flex flex-col">
+                    
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-black text-slate-800"><i class="fa-solid fa-object-group text-blue-500 mr-2"></i> 2. Lienzo de Lógica</h2>
+                        <div class="flex gap-2">
+                            <button onclick="addCalcRow()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm">
+                                + Añadir Operación
+                            </button>
+                            <button onclick="addIfRow()" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-bold py-2 px-4 rounded-xl shadow-sm transition-colors text-sm">
+                                + Añadir Regla SI
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="canvas-area" class="flex-1 bg-slate-100/50 rounded-3xl border-2 border-dashed border-slate-300 p-6 overflow-auto">
+                        <div class="text-center text-slate-400 font-bold mt-10" id="canvas-empty">
+                            <i class="fa-solid fa-arrow-pointer text-4xl mb-3"></i>
+                            <p>Utiliza los botones de arriba para añadir bloques y arrastra los elementos de la izquierda hacia los espacios vacíos.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div id="vista-cargando" class="hidden flex-1 flex-col items-center justify-center p-10 bg-white z-50 absolute inset-0">
+                <div class="w-32 h-32 border-8 border-emerald-100 border-t-emerald-600 rounded-full animate-spin mb-10 shadow-lg"></div>
+                <h2 class="text-4xl font-black text-slate-800 mb-4">Procesando Lógica Visual</h2>
+                <p class="text-slate-500 font-bold text-xl mb-12">Convirtiendo bloques a código y compilando...</p>
+                <div class="w-80"><div class="loader-bar"></div></div>
+            </div>
+
+            <div id="vista-resultados" class="hidden flex-1 flex-col overflow-auto bg-slate-50 z-50 absolute inset-0 p-8">
+                <div class="max-w-4xl mx-auto w-full h-full flex flex-col relative bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden">
+                    <div class="absolute top-6 right-6 z-10">
+                        <button onclick="regresarAlConstructor()" class="bg-white hover:bg-slate-100 text-slate-700 px-5 py-3 rounded-xl font-bold transition-all shadow border border-slate-200 flex items-center">
+                            <i class="fa-solid fa-rotate-left mr-2"></i> Volver al Lienzo
+                        </button>
+                    </div>
+                    
+                    <div class="flex-1 overflow-auto p-10 flex flex-col">
+                        <div class="text-center mb-10">
+                            <div class="w-24 h-24 bg-blue-100 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-inner border border-blue-200">
+                                <i class="fa-solid fa-file-invoice-dollar text-5xl text-blue-600"></i>
+                            </div>
+                            <h2 class="text-4xl md:text-5xl font-black text-slate-800 mb-3 tracking-tight">Nómina Procesada</h2>
+                            <p class="text-slate-500 text-xl font-medium">Cálculos verificados visualmente.</p>
+                        </div>
+                        
+                        <div id="contenedor-tarjetas" class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-12"></div>
+                        
+                        <div class="mt-auto w-full border-t border-slate-100 pt-8">
+                            <div class="flex flex-col sm:flex-row justify-center gap-6 mb-8">
+                                <button id="btn-aprobar" onclick="abrirModalSeguridad()" class="flex-1 min-w-[200px] bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-5 px-8 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center">
+                                    <i class="fa-solid fa-file-signature mr-3 text-2xl"></i> Autorizar y Emitir
+                                </button>
+                                <button id="btn-pdf" onclick="descargarPDF()" class="flex-1 min-w-[200px] bg-slate-100 text-slate-400 font-black text-xl py-5 px-8 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200">
+                                    <i class="fa-solid fa-lock mr-3 text-2xl" id="icon-pdf"></i> PDF Informe
+                                </button>
+                            </div>
+                            
+                            <a href="implementacion.html" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-black text-lg py-5 rounded-2xl shadow-2xl transition-transform hover:scale-105 flex justify-center items-center border border-slate-700">
+                                <i class="fa-solid fa-rocket text-purple-400 mr-3 text-2xl"></i> Opciones de Implementación B2B
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[60] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-sm w-full text-center transform scale-95 transition-transform duration-300 relative border-t-8 border-emerald-600">
+            <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner border border-slate-200">
+                <i class="fa-solid fa-lock text-4xl text-slate-700"></i>
+            </div>
+            <h2 class="text-2xl font-black text-slate-800 mb-2">Autorización Bancaria</h2>
+            <p class="text-slate-500 mb-8 text-sm">Ingrese su clave corporativa.</p>
+
+            <div class="text-left mb-6">
+                <label class="text-xs font-bold text-slate-400 uppercase tracking-widest ml-1">Token Seguro:</label>
+                <input type="password" id="input-password" class="mt-2 w-full bg-slate-50 border border-slate-300 text-slate-800 text-center text-2xl rounded-xl focus:border-emerald-500 block px-4 py-4 font-mono tracking-widest shadow-inner outline-none transition-colors" placeholder="••••••••">
+            </div>
+            
+            <p id="error-password" class="text-red-500 text-sm font-bold h-6 mb-2 opacity-0 transition-opacity"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Credencial denegada.</p>
+            
+            <div id="loading-password" class="hidden mb-6 mt-4">
+                <div class="loader-bar"></div>
+            </div>
+
+            <div class="flex gap-4 mt-2" id="botones-seguridad">
+                <button onclick="cerrarModalSeguridad()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-4 rounded-xl transition-colors">Cancelar</button>
+                <button onclick="verificarFirma()" class="w-2/3 bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:scale-105 flex justify-center items-center">
+                    <i class="fa-solid fa-fingerprint mr-2"></i> Procesar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-fase-completada" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[70] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+        <div class="bg-white rounded-3xl shadow-2xl p-10 max-w-md w-full text-center transform scale-95 transition-transform duration-300 relative" id="modal-content">
+            <button onclick="cerrarModal()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <div id="modal-icon-bg" class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner"><i id="modal-icon" class=""></i></div>
+            <h2 id="modal-title" class="text-3xl font-black text-slate-800 mb-3"></h2>
+            <p id="modal-desc" class="text-slate-500 mb-10 text-lg leading-relaxed"></p>
+            <button id="modal-btn" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-6 rounded-xl shadow-xl transition-transform hover:scale-105 text-lg flex justify-center items-center"></button>
+        </div>
+    </div>
+
+    <script>
+        // Memoria y estado
+        let visualVars = [];
+        let memoriaRAMGlobal = {}; 
+        let nominaAprobada = false;
+
+        // ==================== LÓGICA DRAG & DROP ====================
+        function crearVarVisual() {
+            let name = document.getElementById('var-name').value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '');
+            let val = document.getElementById('var-val').value.trim();
+            if (!name) { alert("Ponle un nombre a la variable."); return; }
+            if (visualVars.find(v => v.name === name)) { alert("Variable ya existe."); return; }
+            
+            visualVars.push({ name: name, value: val || 0 });
+            document.getElementById('var-name').value = '';
+            document.getElementById('var-val').value = '';
+            actualizarPaleta();
+        }
+
+        function crearNumVisual() {
+            let val = document.getElementById('num-val').value.trim();
+            if (!val) return;
+            const container = document.getElementById('palette-nums');
+            container.innerHTML += `<div class="pill pill-num" draggable="true" ondragstart="drag(event)" data-val="${val}" data-type="num">${val}</div>`;
+            document.getElementById('num-val').value = '';
+        }
+
+        function actualizarPaleta() {
+            const container = document.getElementById('palette-vars');
+            container.innerHTML = '';
+            visualVars.forEach(v => {
+                container.innerHTML += `<div class="pill pill-var" draggable="true" ondragstart="drag(event)" data-val="${v.name}" data-type="var">${v.name}</div>`;
+            });
+        }
+
+        // Eventos D&D nativos
+        function drag(ev) {
+            ev.dataTransfer.setData("val", ev.target.getAttribute('data-val'));
+            ev.dataTransfer.setData("type", ev.target.getAttribute('data-type'));
+            
+            // Setear el color para reconstruir el pill al hacer drop
+            let color = "bg-slate-500";
+            if(ev.target.classList.contains('pill-var')) color = "pill-var";
+            if(ev.target.classList.contains('pill-num')) color = "pill-num";
+            if(ev.target.classList.contains('pill-op')) color = "pill-op";
+            if(ev.target.classList.contains('pill-comp')) color = "pill-comp";
+            
+            ev.dataTransfer.setData("color", color);
+        }
+
+        function allowDrop(ev) {
+            ev.preventDefault();
+            if(!ev.currentTarget.classList.contains('filled')) {
+                ev.currentTarget.classList.add('drag-over');
+            }
+        }
+        function leaveDrop(ev) {
+            ev.currentTarget.classList.remove('drag-over');
+        }
+
+        function drop(ev, el) {
+            ev.preventDefault();
+            el.classList.remove('drag-over');
+            
+            let val = ev.dataTransfer.getData("val");
+            let type = ev.dataTransfer.getData("type");
+            let color = ev.dataTransfer.getData("color");
+            
+            // Validar que no metan un operador donde va una variable
+            let reqType = el.getAttribute('data-req'); // 'var_num', 'op', 'comp', 'var'
+            if(reqType === 'var' && type !== 'var') { alert("Aquí solo puedes poner una Variable (Azul)."); return; }
+            if(reqType === 'var_num' && (type !== 'var' && type !== 'num')) { alert("Aquí solo puedes poner Variable o Número."); return; }
+            if(reqType === 'op' && type !== 'op') { alert("Aquí solo va un Operador Matemático (+, -, *, /)."); return; }
+            if(reqType === 'comp' && type !== 'comp') { alert("Aquí solo va un Comparador (>, <, ==)."); return; }
+
+            // Llenar el Dropzone
+            el.innerHTML = `<div class="pill ${color} shadow-sm !cursor-pointer" onclick="limpiarDropzone(this.parentElement)" title="Click para quitar">${val}</div>`;
+            el.setAttribute('data-filled', val);
+            el.classList.add('filled');
+        }
+
+        function limpiarDropzone(el) {
+            el.innerHTML = el.getAttribute('data-label');
+            el.removeAttribute('data-filled');
+            el.classList.remove('filled');
+        }
+
+        // ==================== CREADOR DE FILAS (LIENZO) ====================
+        function addCalcRow() {
+            document.getElementById('canvas-empty').style.display = 'none';
+            const area = document.getElementById('canvas-area');
+            const row = document.createElement('div');
+            row.className = "logic-row row-calc fade-in relative";
+            row.innerHTML = `
+                <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold shadow hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                <div class="dropzone dz-res" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
+                <span class="font-black text-slate-400 text-xl mx-2">=</span>
+                <div class="dropzone dz-v1" data-req="var_num" data-label="Valor 1" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 1</div>
+                <div class="dropzone dz-op" data-req="op" data-label="Op" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Op</div>
+                <div class="dropzone dz-v2" data-req="var_num" data-label="Valor 2" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor 2</div>
+            `;
+            area.appendChild(row);
+        }
+
+        function addIfRow() {
+            document.getElementById('canvas-empty').style.display = 'none';
+            const area = document.getElementById('canvas-area');
+            const row = document.createElement('div');
+            row.className = "logic-row row-if fade-in relative flex-col items-start";
+            row.innerHTML = `
+                <button onclick="this.parentElement.remove()" class="absolute -top-2 -right-2 w-6 h-6 bg-red-100 text-red-500 rounded-full flex items-center justify-center font-bold shadow hover:bg-red-500 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-xs"></i></button>
+                
+                <div class="flex items-center flex-wrap gap-2 mb-2 w-full">
+                    <span class="bg-emerald-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">SI</span>
+                    <div class="dropzone dz-cv1" data-req="var_num" data-label="Var" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Var</div>
+                    <div class="dropzone dz-comp" data-req="comp" data-label="Cond" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Cond</div>
+                    <div class="dropzone dz-cv2" data-req="var_num" data-label="Meta" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Meta</div>
+                </div>
+                
+                <div class="flex items-center flex-wrap gap-2 mb-2 pl-8 border-l-2 border-slate-300 ml-4 w-full">
+                    <span class="bg-blue-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">ENTONCES</span>
+                    <div class="dropzone dz-tv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
+                    <span class="font-black text-slate-400">=</span>
+                    <div class="dropzone dz-tval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
+                </div>
+
+                <div class="flex items-center flex-wrap gap-2 pl-8 border-l-2 border-slate-300 ml-4 w-full opacity-80">
+                    <span class="bg-slate-500 text-white font-black px-3 py-1 rounded-lg uppercase text-xs shadow-sm">SINO</span>
+                    <div class="dropzone dz-fv" data-req="var" data-label="Variable" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Variable</div>
+                    <span class="font-black text-slate-400">=</span>
+                    <div class="dropzone dz-fval" data-req="var_num" data-label="Valor" ondragover="allowDrop(event)" ondragleave="leaveDrop(event)" ondrop="drop(event, this)">Valor</div>
+                </div>
+            `;
+            area.appendChild(row);
+        }
+
+        // ==================== TRADUCCIÓN VISUAL A CÓDIGO Y COMPILACIÓN ====================
+        function procesarNoCode() {
+            if (visualVars.length === 0) {
+                mostrarModal('Aviso', 'Debes crear al menos una variable en el Paso 1.', 'fa-cube', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
+                return;
+            }
+
+            let code = "";
+            visualVars.forEach(v => {
+                code += `VAR ${v.name} = ${v.value};\n`;
+            });
+            code += "\nINICIO\n";
+
+            let rows = document.querySelectorAll('.logic-row');
+            if (rows.length === 0) {
+                mostrarModal('Lienzo Vacío', 'Añade alguna regla o cálculo en el lienzo.', 'fa-object-group', 'text-blue-500', 'bg-blue-100', 'Entendido', 'cerrarModal()');
+                return;
+            }
+
+            let hasEmpty = false;
+            rows.forEach(row => {
+                if (row.classList.contains('row-calc')) {
+                    let rRes = row.querySelector('.dz-res').getAttribute('data-filled');
+                    let rV1 = row.querySelector('.dz-v1').getAttribute('data-filled');
+                    let rOp = row.querySelector('.dz-op').getAttribute('data-filled');
+                    let rV2 = row.querySelector('.dz-v2').getAttribute('data-filled');
+                    if(!rRes || !rV1 || !rOp || !rV2) hasEmpty = true;
+                    code += `  ${rRes} = ${rV1} ${rOp} ${rV2};\n`;
+                } else if (row.classList.contains('row-if')) {
+                    let rV1 = row.querySelector('.dz-cv1').getAttribute('data-filled');
+                    let rComp = row.querySelector('.dz-comp').getAttribute('data-filled');
+                    let rV2 = row.querySelector('.dz-cv2').getAttribute('data-filled');
+                    let rTv = row.querySelector('.dz-tv').getAttribute('data-filled');
+                    let rTval = row.querySelector('.dz-tval').getAttribute('data-filled');
+                    let rFv = row.querySelector('.dz-fv').getAttribute('data-filled');
+                    let rFval = row.querySelector('.dz-fval').getAttribute('data-filled');
+                    if(!rV1 || !rComp || !rV2 || !rTv || !rTval || !rFv || !rFval) hasEmpty = true;
+                    code += `  SI ${rV1} ${rComp} ${rV2} ENTONCES\n   ${rTv} = ${rTval};\n  SINO\n   ${rFv} = ${rFval};\n  FIN SI;\n`;
+                }
+            });
+            code += "FIN";
+
+            if (hasEmpty) {
+                mostrarModal('Bloques Incompletos', 'Hay espacios vacíos en tu lienzo. Arrastra las piezas correctas desde la Paleta.', 'fa-puzzle-piece', 'text-amber-500', 'bg-amber-100', 'Revisar', 'cerrarModal()');
+                return;
+            }
+
+            // Cambiar a vista cargando
+            document.getElementById('vista-lienzo').classList.add('hidden');
+            document.getElementById('vista-cargando').classList.remove('hidden');
+            document.getElementById('vista-cargando').classList.add('flex', 'fade-in');
+
+            // En lugar de depender de la API de Node (que no está visualmente acá), ejecutamos el evaluador semántico directo para mantenerlo No-Code rápido.
+            setTimeout(() => {
+                ejecutarSilenciosoLocal(code);
+            }, 2500);
+        }
+
+        // El intérprete en JS integrado para procesar la lógica pura generada por los bloques visuales
+        function ejecutarSilenciosoLocal(codigo) {
+            memoriaRAMGlobal = {};
+            try {
+                // Parseo manual simplificado para la estructura que genera el constructor visual
+                let lineas = codigo.split('\n');
+                let inIf = false;
+                let ifConditionTrue = false;
+
+                lineas.forEach(l => {
+                    let trim = l.trim();
+                    if (!trim || trim === 'INICIO' || trim === 'FIN') return;
+
+                    // Declaraciones
+                    if (trim.startsWith('VAR')) {
+                        let parts = trim.replace('VAR', '').replace(';', '').split('=');
+                        let name = parts[0].trim();
+                        let val = parts.length > 1 ? parseFloat(parts[1].trim()) : 0;
+                        memoriaRAMGlobal[name] = { valor: isNaN(val)?0:val, categoria: 'VAR' };
+                    }
+                    // Condicional SI
+                    else if (trim.startsWith('SI')) {
+                        inIf = true;
+                        let condStr = trim.replace('SI', '').replace('ENTONCES', '').trim();
+                        let parts = condStr.split(' ');
+                        let v1 = isNaN(parts[0]) ? parseFloat(memoriaRAMGlobal[parts[0]].valor) : parseFloat(parts[0]);
+                        let op = parts[1];
+                        let v2 = isNaN(parts[2]) ? parseFloat(memoriaRAMGlobal[parts[2]].valor) : parseFloat(parts[2]);
+                        
+                        if(op === '>') ifConditionTrue = v1 > v2;
+                        if(op === '<') ifConditionTrue = v1 < v2;
+                        if(op === '==') ifConditionTrue = v1 === v2;
+                    }
+                    else if (trim.startsWith('SINO')) {
+                        inIf = true;
+                        ifConditionTrue = !ifConditionTrue; // Invert logic for SINO block
+                    }
+                    else if (trim.startsWith('FIN SI')) {
+                        inIf = false;
+                    }
+                    // Asignación u Operación
+                    else {
+                        if (inIf && !ifConditionTrue) return; // Skip if condition is false
+                        
+                        let clean = trim.replace(';', '');
+                        let assignSplit = clean.split('=');
+                        if (assignSplit.length !== 2) return;
+                        
+                        let target = assignSplit[0].trim();
+                        let expr = assignSplit[1].trim();
+                        
+                        let opMatch = expr.match(/([\w\d_]+)\s*([\+\-\*\/])\s*([\w\d_]+)/);
+                        if (opMatch) {
+                            let n1Str = opMatch[1];
+                            let opStr = opMatch[2];
+                            let n2Str = opMatch[3];
+                            
+                            let n1 = isNaN(n1Str) ? parseFloat(memoriaRAMGlobal[n1Str].valor) : parseFloat(n1Str);
+                            let n2 = isNaN(n2Str) ? parseFloat(memoriaRAMGlobal[n2Str].valor) : parseFloat(n2Str);
+                            
+                            let res = 0;
+                            if(opStr === '+') res = n1 + n2;
+                            if(opStr === '-') res = n1 - n2;
+                            if(opStr === '*') res = n1 * n2;
+                            if(opStr === '/') res = n1 / n2;
+                            
+                            memoriaRAMGlobal[target].valor = res;
+                        } else {
+                            // Simple assign
+                            let n1 = isNaN(expr) ? parseFloat(memoriaRAMGlobal[expr].valor) : parseFloat(expr);
+                            memoriaRAMGlobal[target].valor = n1;
+                        }
+                    }
+                });
+
+                // Transición a Resultados
+                document.getElementById('vista-cargando').classList.add('hidden');
+                document.getElementById('vista-cargando').classList.remove('flex');
+                
+                generarTarjetasResultados();
+                
+                document.getElementById('vista-resultados').classList.remove('hidden');
+                document.getElementById('vista-resultados').classList.add('flex', 'fade-in');
+
+            } catch (error) {
+                document.getElementById('vista-cargando').classList.add('hidden');
+                document.getElementById('vista-cargando').classList.remove('flex');
+                document.getElementById('vista-lienzo').classList.remove('hidden');
+                mostrarModal('Error Interno', 'La lógica contiene errores incompatibles. Asegúrate de declarar todas las variables que uses.', 'fa-skull-crossbones', 'text-red-500', 'bg-red-100', 'Revisar', 'cerrarModal()');
+            }
+        }
+
+        // ==================== DASHBOARD FINAL ====================
+        function generarTarjetasResultados() {
+            const contenedor = document.getElementById('contenedor-tarjetas');
+            let tarjetasHTML = '';
+            
+            for(let key in memoriaRAMGlobal) {
+                let varData = memoriaRAMGlobal[key];
+                let textoAmigable = key.replace(/_/g, ' ').toUpperCase();
+                
+                let icon = "fa-hashtag text-slate-400";
+                let bgClass = "bg-white border-slate-200 shadow-sm";
+                
+                if(textoAmigable.includes("SALARIO")) { icon = "fa-building-columns text-blue-500"; }
+                if(textoAmigable.includes("VENTA")) { icon = "fa-chart-line text-amber-500"; }
+                if(textoAmigable.includes("BONO")) { icon = "fa-hand-holding-dollar text-emerald-500"; }
+                if(textoAmigable.includes("TOTAL") || textoAmigable.includes("PAGAR")) { 
+                    icon = "fa-sack-dollar text-emerald-600";
+                    bgClass = "bg-emerald-50 border-emerald-200 shadow-md";
+                }
+                
+                tarjetasHTML += `
+                    <div class="${bgClass} p-8 rounded-3xl border flex items-center justify-between hover:-translate-y-1 transition-transform">
+                        <div>
+                            <h4 class="text-sm font-bold text-slate-500 mb-2 uppercase tracking-widest">${textoAmigable}</h4>
+                            <p class="text-4xl font-black text-slate-800">Q. ${varData.valor.toLocaleString('es-GT', {minimumFractionDigits: 2})}</p>
+                        </div>
+                        <div class="w-20 h-20 bg-white rounded-2xl flex items-center justify-center text-4xl shadow-inner border border-slate-100">
+                            <i class="fa-solid ${icon}"></i>
+                        </div>
+                    </div>
+                `;
+            }
+            contenedor.innerHTML = tarjetasHTML;
+        }
+
+        function regresarAlConstructor() {
+            document.getElementById('vista-resultados').classList.add('hidden');
+            document.getElementById('vista-resultados').classList.remove('flex');
+            
+            document.getElementById('vista-lienzo').classList.remove('hidden');
+            
+            const btnPdf = document.getElementById('btn-pdf');
+            btnPdf.className = "flex-1 bg-slate-100 text-slate-400 font-black text-xl py-6 rounded-2xl transition-all flex justify-center items-center cursor-not-allowed border-2 border-slate-200";
+            document.getElementById('icon-pdf').className = "fa-solid fa-lock mr-3 text-2xl";
+            
+            const btnAprobar = document.getElementById('btn-aprobar');
+            btnAprobar.disabled = false;
+            btnAprobar.innerHTML = '<i class="fa-solid fa-file-signature mr-3 text-2xl"></i> Autorizar y Emitir';
+            btnAprobar.className = "flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex justify-center items-center";
+        }
+
+        // ==================== UTILIDADES / MODALES ====================
+        function mostrarModal(titulo, desc, icono, colorIcono, bgIcono, textoBtn, accionBtn) {
+            document.getElementById('modal-icon').className = `fa-solid ${icono} text-6xl ${colorIcono}`;
+            document.getElementById('modal-icon-bg').className = `w-32 h-32 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner ${bgIcono}`;
+            document.getElementById('modal-title').innerText = titulo;
+            document.getElementById('modal-desc').innerText = desc;
+            const btn = document.getElementById('modal-btn');
+            btn.innerHTML = textoBtn; btn.setAttribute('onclick', accionBtn);
+            const modal = document.getElementById('modal-fase-completada');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('modal-content').classList.remove('scale-95'); }, 50);
+        }
+
+        function cerrarModal() {
+            const modal = document.getElementById('modal-fase-completada');
+            modal.classList.add('opacity-0'); document.getElementById('modal-content').classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        // ==================== SEGURIDAD ====================
+        function abrirModalSeguridad() {
+            document.getElementById('input-password').value = '';
+            document.getElementById('error-password').classList.add('opacity-0');
+            document.getElementById('loading-password').classList.add('hidden');
+            document.getElementById('botones-seguridad').classList.remove('hidden');
+            
+            const modal = document.getElementById('modal-seguridad');
+            modal.classList.remove('hidden');
+            setTimeout(() => { modal.classList.remove('opacity-0'); modal.firstElementChild.classList.remove('scale-95'); }, 50);
+            
+            document.getElementById('input-password').focus();
+            document.getElementById('input-password').onkeydown = function(e){ if(e.key === 'Enter') verificarFirma(); };
+        }
+
+        function cerrarModalSeguridad() {
+            const modal = document.getElementById('modal-seguridad');
+            modal.classList.add('opacity-0'); modal.firstElementChild.classList.add('scale-95');
+            setTimeout(() => { modal.classList.add('hidden'); }, 300);
+        }
+
+        function verificarFirma() {
+            const input = document.getElementById('input-password').value;
+            const errorText = document.getElementById('error-password');
+            
+            errorText.classList.add('opacity-0');
+            document.getElementById('botones-seguridad').classList.add('hidden');
+            document.getElementById('loading-password').classList.remove('hidden');
+            
+            setTimeout(() => {
+                if (input === 'peppers') {
+                    cerrarModalSeguridad();
+                    setTimeout(aprobarNominaReal, 400); 
+                } else {
+                    document.getElementById('loading-password').classList.add('hidden');
+                    document.getElementById('botones-seguridad').classList.remove('hidden');
+                    errorText.classList.remove('opacity-0');
+                    document.getElementById('input-password').value = '';
+                    document.getElementById('input-password').focus();
+                }
+            }, 1200); 
+        }
+
+        function aprobarNominaReal() {
+            const btn = document.getElementById('btn-aprobar');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin mr-3 text-2xl"></i> Encriptando...';
+            btn.disabled = true;
+            btn.classList.add('opacity-75', 'cursor-not-allowed', 'scale-100');
+            btn.classList.remove('hover:scale-105');
+
+            setTimeout(() => {
+                btn.innerHTML = '<i class="fa-solid fa-check-double mr-3 text-2xl"></i> Transacción Cerrada';
+                btn.className = "flex-1 bg-slate-200 text-slate-500 font-black text-xl py-6 rounded-2xl flex justify-center items-center cursor-not-allowed border-2 border-slate-300";
+                
+                nominaAprobada = true;
+                
+                const btnPdf = document.getElementById('btn-pdf');
+                btnPdf.className = "flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black text-xl py-6 rounded-2xl shadow-xl shadow-blue-600/30 transition-transform hover:scale-105 flex justify-center items-center";
+                document.getElementById('icon-pdf').className = "fa-solid fa-file-pdf mr-3 text-2xl";
+                
+                let totalKey = Object.keys(memoriaRAMGlobal).find(k => k.includes('total') || k.includes('pagar'));
+                let total = totalKey ? memoriaRAMGlobal[totalKey].valor : 0;
+                
+                confetti({ particleCount: 200, spread: 100, origin: { y: 0.5 } });
+                
+                mostrarModal(
+                    'Aprobación Exitosa', 
+                    `Firma validada. Se ha ordenado una transferencia irrevocable de Q. ${total.toLocaleString('es-GT', {minimumFractionDigits: 2})} a la cuenta del USUARIO.`, 
+                    'fa-stamp', 
+                    'text-emerald-600', 
+                    'bg-emerald-100', 
+                    'Descargar PDF <i class="fa-solid fa-download ml-2"></i>', 
+                    'cerrarModal()'
+                );
+            }, 1500);
+        }
+
+        // ==================== GENERACIÓN DE PDF ====================
+        function descargarPDF() {
+            if (!nominaAprobada) {
+                mostrarModal('Acción Denegada', 'Debe autorizar la nómina mediante Firma Electrónica antes de generar el estado de cuenta.', 'fa-lock', 'text-red-500', 'bg-red-100', 'Entendido', 'cerrarModal()');
+                return;
+            }
+
+            let fechaActual = new Date();
+            let mes = fechaActual.toLocaleString('es-ES', { month: 'long' });
+            let año = fechaActual.getFullYear();
+            let fechaStr = fechaActual.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            let htmlReporte = `
+                <div style="font-family: Arial, sans-serif; font-size: 12px; color: #000; width: 800px; padding: 20px; box-sizing: border-box; background: white;">
+                    <div style="background-color: #003876; color: white; padding: 4px 10px; font-weight: bold; font-size: 16px; margin-bottom: 15px;">
+                        Consulta personalizada - Estado de Cuenta PayLogic
+                    </div>
+
+                    <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                        <div style="width: 50px; height: 50px; border-radius: 50%; border: 4px solid #00a4e4; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 24px; color: #003876; font-style: italic; margin-right: 15px;">PL</div>
+                        <div style="font-size: 28px; font-weight: 900; color: #000; font-style: italic; letter-spacing: -1px; line-height: 1;">MOTOR<br>PAYLOGIC</div>
+                    </div>
+                    <div style="font-size: 10px; font-weight: bold; margin-bottom: 5px;">
+                        MOTOR DE COMPILACIÓN PAYLOGIC, S.A. Quetzaltenango, Guatemala C.A. PBX: 2420-3000
+                    </div>
+
+                    <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 2px; font-weight: bold; text-transform: uppercase;">
+                        USUARIO / EMPLEADO
+                    </div>
+                    <div style="border: 2px solid #000; padding: 4px 8px; margin-bottom: 15px; text-align: right; font-style: italic; font-size: 11px;">
+                        Numero de cuenta: <span style="font-weight: bold; font-style: normal;">0510009324</span> Correspondiente al mes de: <span style="font-weight: bold; font-style: normal;">${mes} ${año}</span>
+                    </div>
+
+                    <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; font-size: 11px;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid #000;">
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 10%;">Día</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 10%;">Docto.</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 40%;">Descripción</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 12%;">Débito</th>
+                                <th style="border-right: 1px solid #000; padding: 4px; width: 12%;">Crédito</th>
+                                <th style="padding: 4px; width: 16%;">Saldo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">****SALDO ANTERIOR****</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;"></td>
+                                <td style="padding: 2px 4px; text-align: right;">0.00</td>
+                            </tr>
+            `;
+
+            let saldo = 0;
+            let totalDebito = 0;
+            let totalCredito = 0;
+            let documentBase = 141690;
+
+            for(let key in memoriaRAMGlobal) {
+                if(key.includes("total") || key.includes("salario_final") || key.includes("ventas") || key.includes("horas")) continue; 
+
+                let v = memoriaRAMGlobal[key];
+                let valorNum = parseFloat(v.valor);
+                
+                if (isNaN(valorNum)) continue;
+
+                let isDebito = key.toLowerCase().includes("descuento") || key.toLowerCase().includes("impuesto") || key.toLowerCase().includes("deduccion");
+                let debitoStr = "";
+                let creditoStr = "";
+                let desc = key.replace(/_/g, ' ').toUpperCase();
+
+                documentBase++;
+
+                if (valorNum === 0) {
+                    desc = desc + " (NO RECIBIDO)";
+                    creditoStr = "0.00";
+                } else {
+                    if (isDebito) {
+                        debitoStr = valorNum.toFixed(2);
+                        totalDebito += valorNum;
+                        saldo -= valorNum;
+                    } else {
+                        creditoStr = valorNum.toFixed(2);
+                        totalCredito += valorNum;
+                        saldo += valorNum;
+                    }
+                }
+
+                htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${documentBase}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">REGISTRO DE ${desc}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;">${debitoStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;">${creditoStr}</td>
+                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
+                            </tr>
+                `;
+            }
+
+            htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">${fechaStr}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: center;">321009</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px;">PLANILLA ${mes.toUpperCase()} ${año}</td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="border-right: 1px solid #000; padding: 2px 4px; text-align: right;"></td>
+                                <td style="padding: 2px 4px; text-align: right;">${saldo.toFixed(2)}</td>
+                            </tr>
+            `;
+
+            for(let i=0; i<4; i++){
+                htmlReporte += `
+                            <tr>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="border-right: 1px solid #000; padding: 8px 4px;"></td>
+                                <td style="padding: 8px 4px;"></td>
+                            </tr>
+                `;
+            }
+
+            htmlReporte += `
+                        </tbody>
+                    </table>
+                    <table style="width: 100%; border-collapse: collapse; margin-top: 0;">
+                        <tr>
+                            <td style="width: 60%; padding: 5px; font-size: 8px; color: #333; text-transform: uppercase;">
+                                FAVOR DE REVISAR LAS OPERACIONES. SI DENTRO DE 30 DÍAS SIGUIENTES DEL MES CALENDARIO, NO HEMOS RECIBIDO SUS OBSERVACIONES POR ESCRITO, CONSIDERAMOS QUE HA MERECIDO SU APROBACIÓN. LE(S) ROGAMOS COMUNICARNOS POR ESCRITO CUALQUIER CAMBIO DE DIRECCIÓN Y CONSERVAR EL ESTADO DE CUENTA PORQUE EL MOTOR PAYLOGIC NO EXTIENDE DUPLICADOS.
+                            </td>
+                            <td style="width: 10%; font-weight: bold; text-align: right; padding-right: 10px;">
+                                Totales:
+                            </td>
+                            <td style="width: 30%;">
+                                <table style="width: 100%; border-collapse: collapse; border: 2px solid #000; border-top: none;">
+                                    <tr>
+                                        <td style="border-right: 1px solid #000; padding: 6px 4px; text-align: right; width: 33%; font-weight: bold;">${totalDebito.toFixed(2)}</td>
+                                        <td style="border-right: 1px solid #000; padding: 6px 4px; text-align: right; width: 33%; font-weight: bold;">${totalCredito.toFixed(2)}</td>
+                                        <td style="padding: 6px 4px; text-align: right; width: 34%; font-weight: bold;">${saldo.toFixed(2)}</td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+
+            const opt = {
+                margin:       0.2,
+                filename:     'Estado_Cuenta_PayLogic.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+                jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+
+            html2pdf().set(opt).from(htmlReporte).save();
+        }
+    </script>
+</body>
+</html>
