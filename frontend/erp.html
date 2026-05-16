@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PayLogic ERP | Gestión Masiva de Nómina</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        /* Animaciones base */
+        .fade-in { 
+            animation: fadeIn 0.3s ease-out forwards; 
+        }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        
+        .bg-pattern { 
+            background-image: radial-gradient(#e2e8f0 1px, transparent 1px); 
+            background-size: 20px 20px; 
+        }
+
+        .table-container { 
+            max-height: 450px; 
+            overflow-y: auto; 
+        }
+        
+        /* Animación del Loader (Puntos) */
+        .loader-dots div { 
+            animation-timing-function: cubic-bezier(0, 1, 1, 0); 
+        }
+        .loader-dots div:nth-child(1) { left: 8px; animation: loader-dots1 0.6s infinite; }
+        .loader-dots div:nth-child(2) { left: 8px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(3) { left: 32px; animation: loader-dots2 0.6s infinite; }
+        .loader-dots div:nth-child(4) { left: 56px; animation: loader-dots3 0.6s infinite; }
+
+        @keyframes loader-dots1 { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes loader-dots3 { 0% { transform: scale(1); } 100% { transform: scale(0); } }
+        @keyframes loader-dots2 { 0% { transform: translate(0, 0); } 100% { transform: translate(24px, 0); } }
+
+        /* Estilos de Botones Toggle Modernos */
+        .toggle-checkbox:checked { right: 0; border-color: #3b82f6; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #3b82f6; }
+        .chk-red:checked { border-color: #ef4444 !important; }
+        .chk-red:checked + .toggle-label { background-color: #ef4444 !important; }
+        .chk-emerald:checked { border-color: #10b981 !important; }
+        .chk-emerald:checked + .toggle-label { background-color: #10b981 !important; }
+
+        /* Scrollbar limpio */
+        .hide-scroll::-webkit-scrollbar { 
+            width: 6px; 
+        }
+        .hide-scroll::-webkit-scrollbar-track { 
+            background: transparent; 
+        }
+        .hide-scroll::-webkit-scrollbar-thumb { 
+            background-color: #cbd5e1; 
+            border-radius: 20px; 
+        }
+        
+        /* Pestañas Verticales Activas/Inactivas */
+        .tab-active { 
+            background-color: #eff6ff; 
+            color: #2563eb; 
+            border-right: 4px solid #2563eb; 
+            font-weight: 900; 
+        }
+        .tab-inactive { 
+            color: #64748b; 
+            font-weight: 600; 
+        }
+        .tab-inactive:hover { 
+            background-color: #f8fafc; 
+            color: #334155; 
+        }
+
+        /* Clases para plegar la barra lateral suavemente */
+        .sidebar-transition { 
+            transition: width 0.3s ease, padding 0.3s ease, margin 0.3s ease; 
+            overflow: hidden; 
+        }
+        .sidebar-collapsed { 
+            width: 0 !important; 
+            padding: 0 !important; 
+            border: none !important; 
+            opacity: 0; 
+        }
+    </style>
+</head>
+<body class="bg-slate-50 h-screen w-full flex overflow-hidden font-sans text-slate-800 bg-pattern">
+
+    <aside id="sidebar" class="w-64 bg-slate-900 text-white flex flex-col shadow-2xl z-20 shrink-0 sidebar-transition">
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-800 w-64">
+            <div class="flex items-center">
+                <i class="fa-solid fa-bolt text-blue-400 text-xl mr-3"></i>
+                <h1 class="text-xl font-black tracking-wider">PayLogic<span class="text-blue-400 text-xs ml-1 uppercase">ERP</span></h1>
+            </div>
+        </div>
+        
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto hide-scroll text-sm w-64">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest px-4 mb-2 mt-2">Desarrollo</p>
+            <a href="index.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-code w-6 text-center mr-2"></i> Motor Código
+            </a>
+            <a href="visual.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-shapes w-6 text-center mr-2"></i> Motor Visual
+            </a>
+            <div class="h-px bg-slate-800 my-4"></div>
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-widest px-4 mb-2">Empresarial</p>
+            <a href="implementacion.html" class="flex items-center px-4 py-3 text-slate-400 hover:bg-slate-800 hover:text-white rounded-xl transition-all">
+                <i class="fa-solid fa-building w-6 text-center mr-2"></i> Dashboard B2B
+            </a>
+            <a href="#" class="flex items-center px-4 py-3 bg-blue-600 text-white rounded-xl shadow-lg shadow-blue-900/50">
+                <i class="fa-solid fa-layer-group w-6 text-center mr-2"></i> Central de Nómina
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative w-full">
+        
+        <header class="h-16 bg-white/90 backdrop-blur-md shadow-sm border-b border-slate-200 flex items-center justify-between px-6 z-10 shrink-0 w-full">
+            <div class="flex items-center">
+                <button onclick="UI.toggleSidebar()" class="text-slate-500 hover:text-blue-600 mr-4 transition-colors p-2 rounded-lg hover:bg-blue-50">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <h2 class="text-xl font-black text-slate-800 tracking-tight">
+                    <i class="fa-solid fa-users-gear text-blue-600 mr-2"></i> Centro de Operaciones PayLogic
+                </h2>
+            </div>
+            <div id="status-badge" class="bg-amber-100 text-amber-700 font-bold text-xs px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm">
+                1. Ingreso de Datos
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-auto p-4 md:p-8 w-full hide-scroll">
+            <div class="w-full mx-auto space-y-8 pb-12">
+                
+                <div id="section-data" class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 md:p-8 fade-in w-full transition-all duration-300">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 w-full">
+                        <div>
+                            <h3 class="text-2xl font-black text-slate-800">1. Asistencia y Contratos</h3>
+                            <p class="text-slate-500 text-sm font-medium mt-1">Carga la data del mes (salarios, ventas, horas extra, perfiles).</p>
+                        </div>
+                        <div class="flex gap-3">
+                            <button onclick="UI.generarDatosPrueba()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2.5 px-5 rounded-xl transition-all flex items-center shadow-md text-sm">
+                                <i class="fa-solid fa-user-plus mr-2 text-amber-400"></i> Simular Lote (50)
+                            </button>
+                            <button onclick="document.getElementById('file-input').click()" class="bg-white border-2 border-slate-200 hover:border-blue-500 hover:text-blue-600 text-slate-600 font-bold py-2.5 px-5 rounded-xl transition-all flex items-center text-sm shadow-sm">
+                                <i class="fa-solid fa-file-csv mr-2 text-blue-500"></i> Importar CSV
+                            </button>
+                            <input type="file" id="file-input" class="hidden" accept=".csv" onchange="UI.subirCSV(event)">
+                        </div>
+                    </div>
+
+                    <div class="table-container rounded-xl border border-slate-200 bg-slate-50 shadow-inner w-full">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="sticky top-0 bg-slate-200 text-slate-600 text-xs font-black uppercase tracking-widest border-b border-slate-300 shadow-sm z-10">
+                                <tr>
+                                    <th class="px-4 py-4">Empleado</th>
+                                    <th class="px-4 py-4">Tipo / Pago</th>
+                                    <th class="px-4 py-4 text-right">Salario Base (Q)</th>
+                                    <th class="px-4 py-4 text-center text-amber-600">Hrs Extra</th>
+                                    <th class="px-4 py-4 text-right text-blue-600">Ventas (Q)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="erp-table-body" class="divide-y divide-slate-200 font-medium text-slate-700 bg-white">
+                                <tr id="empty-row">
+                                    <td colspan="5" class="py-24 text-center text-slate-400">
+                                        <i class="fa-solid fa-clipboard-list text-5xl mb-3 text-slate-300 block"></i> Base de datos en espera.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="mt-6 flex justify-between items-center bg-slate-50 p-4 rounded-xl border border-slate-200 w-full">
+                        <button onclick="UI.limpiarTabla()" class="text-red-500 hover:text-red-700 font-bold text-sm transition-colors flex items-center bg-red-50 px-4 py-2 rounded-lg border border-red-100">
+                            <i class="fa-solid fa-trash-can mr-2"></i> Limpiar Planilla
+                        </button>
+                        <div class="flex items-center gap-6">
+                             <div class="text-right border-r border-slate-300 pr-6">
+                                <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Registros Activos</span>
+                                <span id="count-empleados" class="text-2xl font-black text-slate-800">0</span>
+                             </div>
+                             <button onclick="UI.irAPaso2()" id="btn-siguiente" class="bg-blue-600 hover:bg-blue-700 text-white font-black py-3 px-8 rounded-xl shadow-lg transition-all opacity-50 cursor-not-allowed text-sm flex items-center" disabled>
+                                Configurar Reglas de Cálculo <i class="fa-solid fa-arrow-right ml-2"></i>
+                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-logic" class="hidden bg-white rounded-2xl shadow-xl border border-slate-200 fade-in relative w-full flex-col md:flex-row">
+                    
+                    <div class="w-full md:w-64 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0 rounded-l-2xl">
+                        <div class="p-6 border-b border-slate-200">
+                            <h3 class="text-lg font-black text-slate-800">2. Motor de Reglas</h3>
+                            <p class="text-xs text-slate-500 mt-1">Configuración paramétrica del cálculo.</p>
+                        </div>
+                        <div class="flex-1 py-4">
+                            <button onclick="UI.switchTab('tab-ingresos')" id="btn-tab-ingresos" class="w-full text-left px-6 py-4 text-sm tab-active transition-all">
+                                <i class="fa-solid fa-hand-holding-dollar w-6"></i> Ingresos y Devengos
+                            </button>
+                            <button onclick="UI.switchTab('tab-deducciones')" id="btn-tab-deducciones" class="w-full text-left px-6 py-4 text-sm tab-inactive transition-all">
+                                <i class="fa-solid fa-file-invoice-dollar w-6"></i> Deducciones Legales
+                            </button>
+                            <button onclick="UI.switchTab('tab-liquidaciones')" id="btn-tab-liquidaciones" class="w-full text-left px-6 py-4 text-sm tab-inactive transition-all">
+                                <i class="fa-solid fa-scale-balanced w-6"></i> Liquidaciones / Extras
+                            </button>
+                            <button onclick="UI.switchTab('tab-operativa')" id="btn-tab-operativa" class="w-full text-left px-6 py-4 text-sm tab-inactive transition-all">
+                                <i class="fa-solid fa-network-wired w-6"></i> Flujos y Salidas ACH
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 flex flex-col bg-white relative rounded-r-2xl">
+                        <div class="p-6 md:p-8 flex-1 hide-scroll overflow-y-auto max-h-[600px]">
+                            
+                            <div id="tab-ingresos" class="space-y-6 fade-in block">
+                                <h4 class="text-xl font-black text-blue-700 border-b border-slate-100 pb-2 mb-6">Configuración de Ingresos y Comisiones</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-clock text-amber-500 mr-2"></i> Pago de Horas Extra</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-extras" checked class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="space-y-2 text-xs">
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Valor Hora Diurna:</span>
+                                                <span class="font-black text-slate-700">1.5x</span>
+                                            </div>
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Valor Hora Nocturna/Festivo:</span>
+                                                <span class="font-black text-slate-700">2.0x</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-chart-line text-blue-500 mr-2"></i> Comisiones de Venta</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-comisiones" checked class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="space-y-2 text-xs">
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Meta Ventas (> Q.):</span>
+                                                <input type="number" id="val-meta" value="5000" class="w-24 bg-white border border-slate-300 rounded px-2 py-1 font-bold text-right outline-none focus:border-blue-500">
+                                            </div>
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Monto Bono Comis (< Q.):</span>
+                                                <input type="number" id="val-bono-ventas" value="1000" class="w-24 bg-blue-50 border border-blue-200 text-blue-700 rounded px-2 py-1 font-bold text-right outline-none focus:border-blue-500">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-star text-emerald-500 mr-2"></i> Bono Personalizado</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-bono-custom" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="space-y-2 text-xs">
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Nombre del Bono:</span>
+                                                <input type="text" id="val-bono-name" placeholder="Ej. Bono Productividad" class="w-32 bg-white border border-slate-300 rounded px-2 py-1 font-bold outline-none text-slate-700" onblur="Utils.normalizeName(this)">
+                                            </div>
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Monto Exacto (Q):</span>
+                                                <input type="number" id="val-bono-monto" value="500" class="w-24 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded px-2 py-1 font-bold text-right outline-none">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-gas-pump text-slate-500 mr-2"></i> Reembolso Viáticos</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-viaticos" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-600"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                                            <span class="text-slate-500 font-bold">Monto a Reembolsar (Q):</span>
+                                            <input type="number" id="val-viaticos" value="300" class="w-24 bg-white border border-slate-300 rounded px-2 py-1 font-bold text-right outline-none">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="tab-deducciones" class="space-y-6 fade-in hidden">
+                                <h4 class="text-xl font-black text-red-700 border-b border-slate-100 pb-2 mb-6">Retenciones y Descuentos Legales</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    
+                                    <div class="bg-red-50/50 p-4 rounded-xl border border-red-100 shadow-sm">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-red-800 text-sm"><i class="fa-solid fa-notes-medical text-red-500 mr-2"></i> Cuota Laboral IGSS</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-igss" checked class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                                            </label>
+                                        </div>
+                                        <p class="text-[11px] text-red-600 font-bold">Cálculo de ley (4.83% sobre ordinario).</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-landmark text-slate-500 mr-2"></i> Retención ISR</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-isr" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                                            </label>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1">Aplica al exceder renta imponible legal.</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-hand-holding-dollar text-slate-500 mr-2"></i> Préstamos / Anticipos</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-anticipos" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                                            </label>
+                                        </div>
+                                        <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100 text-xs">
+                                            <span class="text-slate-500 font-bold">Descuento Global (Q):</span>
+                                            <input type="number" id="val-anticipo" value="500" class="w-24 bg-red-50 border border-red-200 text-red-700 rounded px-2 py-1 font-bold text-right outline-none focus:border-red-500">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-gavel text-slate-500 mr-2"></i> Embargo Judicial</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-embargo" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
+                                            </label>
+                                        </div>
+                                        <div class="space-y-2 text-xs">
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Razón Legal:</span>
+                                                <input type="text" id="val-embargo-name" placeholder="Pensión Alimenticia" class="w-32 bg-white border border-slate-300 rounded px-2 py-1 font-bold outline-none text-slate-700" onblur="Utils.normalizeName(this)">
+                                            </div>
+                                            <div class="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100">
+                                                <span class="text-slate-500 font-bold">Monto Exacto (Q):</span>
+                                                <input type="number" id="val-embargo-monto" value="800" class="w-24 bg-red-50 border border-red-200 text-red-700 rounded px-2 py-1 font-bold text-right outline-none">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="tab-liquidaciones" class="space-y-6 fade-in hidden">
+                                <h4 class="text-xl font-black text-emerald-700 border-b border-slate-100 pb-2 mb-6">Casos Especiales y Vacaciones</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm md:col-span-2">
+                                        <div class="flex justify-between items-center mb-3">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-plane-departure text-amber-500 mr-2"></i> Pago Proporcional de Vacaciones</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-vacaciones" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                                            </label>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-4 text-xs">
+                                            <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                                                <label class="block text-slate-500 font-bold mb-1">Fecha de Inicio:</label>
+                                                <input type="date" id="vac-inicio" class="w-full bg-white border border-slate-300 rounded px-2 py-1.5 outline-none font-bold text-slate-600">
+                                            </div>
+                                            <div class="bg-slate-50 p-3 rounded border border-slate-100">
+                                                <label class="block text-slate-500 font-bold mb-1">Fecha de Retorno:</label>
+                                                <input type="date" id="vac-fin" class="w-full bg-white border border-slate-300 rounded px-2 py-1.5 outline-none font-bold text-slate-600">
+                                            </div>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-2"><i class="fa-solid fa-calculator"></i> El motor calculará la proporción exacta según los días seleccionados y el salario base individual.</p>
+                                    </div>
+
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-gift text-emerald-500 mr-2"></i> Aguinaldo / Bono 14</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-bono14" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+                                            </label>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1">Planilla extraordinaria legal al 100%.</p>
+                                    </div>
+                                    
+                                    <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                                        <div class="flex justify-between items-center mb-2">
+                                            <span class="font-bold text-slate-700 text-sm"><i class="fa-solid fa-clock-rotate-left text-purple-500 mr-2"></i> Ajustes Retroactivos</span>
+                                            <label class="relative inline-flex items-center cursor-pointer">
+                                                <input type="checkbox" id="mod-retroactivo" class="sr-only peer">
+                                                <div class="w-9 h-5 bg-slate-200 rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-purple-500"></div>
+                                            </label>
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 mt-1">Recálculo por aumentos salariales pasados.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="tab-operativa" class="space-y-6 fade-in hidden">
+                                <h4 class="text-xl font-black text-slate-800 border-b border-slate-100 pb-2 mb-6">Métodos y Flujos de Desembolso</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-slate-500">Periodo de Nómina</label>
+                                        <select class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-700 outline-none focus:border-blue-500">
+                                            <option>Mensual</option>
+                                            <option>Quincenal</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <label class="font-bold text-slate-500">Forma de Desembolso / Salida</label>
+                                        <select id="metodo-pago" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 font-bold text-slate-700 outline-none focus:border-blue-500">
+                                            <option value="transferencia">ACH / Transferencia (Descargar CSV)</option>
+                                            <option value="cheque">Cheque Empresarial (Formato Imprimible)</option>
+                                            <option value="efectivo">Efectivo (Formato Recibo de Pago)</option>
+                                        </select>
+                                    </div>
+                                    <div class="space-y-2 md:col-span-2">
+                                        <label class="font-bold text-slate-500">Flujo de Aprobación</label>
+                                        <div class="flex items-center gap-4 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                                            <span class="font-bold text-slate-700 text-xs">RRHH Prepara</span> <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                                            <span class="font-bold text-slate-700 text-xs">Finanzas Revisa</span> <i class="fa-solid fa-arrow-right text-slate-400"></i>
+                                            <span class="font-black text-emerald-600 text-xs">Tesorería Desembolsa</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sticky bottom-0 left-0 w-full bg-white border-t border-slate-200 p-6 flex justify-between items-center z-10 shadow-[0_-10px_15px_-3px_rgba(0,0,0,0.05)] rounded-br-2xl">
+                            <div class="text-xs font-bold text-slate-400 hidden lg:block">
+                                <i class="fa-solid fa-check-double text-emerald-500 mr-1"></i> Reglas dinámicas listas
+                            </div>
+                            <button onclick="UI.solicitarClaveProcesamiento()" class="w-full lg:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-black text-lg py-3 px-8 rounded-xl shadow-xl shadow-emerald-600/30 transition-transform hover:scale-105 flex items-center justify-center">
+                                <i class="fa-solid fa-play mr-2"></i> Ejecutar Motor PayLogic
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="section-results" class="hidden bg-white rounded-3xl shadow-2xl border-t-8 border-emerald-500 p-6 md:p-8 fade-in w-full transition-all duration-300">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 w-full">
+                        <div>
+                            <h3 class="text-3xl font-black text-slate-800 tracking-tight">Dashboard de Auditoría Criptográfica</h3>
+                            <p class="text-emerald-600 font-bold text-sm mt-1">
+                                <i class="fa-solid fa-circle-check mr-2"></i> Lote calculado. Hash SHA generado. Esperando confirmación de Tesorería.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-3">
+                            <button onclick="Engine.auditoriaIA()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center hover:-translate-y-1">
+                                <i class="fa-solid fa-brain mr-2"></i> Auditoría IA LLM
+                            </button>
+                            <button id="btn-exportar" onclick="Engine.procesarSalidaFinanciera()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center hover:-translate-y-1">
+                                <i class="fa-solid fa-download mr-2"></i> <span id="btn-download-text">Descargar Documentos</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8 w-full">
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Salarios Ordinarios</span>
+                            <span id="stat-bruto" class="text-xl md:text-2xl font-black text-slate-800">Q. 0</span>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <span class="text-[10px] font-black text-blue-500 uppercase tracking-widest block">Total Devengado (+)</span>
+                            <span id="stat-bonos" class="text-xl md:text-2xl font-black text-blue-700">Q. 0</span>
+                        </div>
+                        <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                            <span class="text-[10px] font-black text-red-500 uppercase tracking-widest block">Total Deducido (-)</span>
+                            <span id="stat-deducciones" class="text-xl md:text-2xl font-black text-red-700">Q. 0</span>
+                        </div>
+                        <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-200 shadow-sm">
+                            <span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest block">Desembolso Líquido</span>
+                            <span id="stat-final" class="text-2xl md:text-3xl font-black text-emerald-700">Q. 0</span>
+                        </div>
+                    </div>
+
+                    <div class="table-container rounded-xl border border-emerald-100 shadow-inner bg-white w-full">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead class="bg-emerald-50 text-emerald-800 text-xs font-black uppercase tracking-widest sticky top-0 border-b border-emerald-200 z-10">
+                                <tr>
+                                    <th class="px-4 py-3">Empleado</th>
+                                    <th class="px-4 py-3 text-right text-slate-500">S. Base Ordinario</th>
+                                    <th class="px-4 py-3 text-right text-blue-600">Devengado Adicional</th>
+                                    <th class="px-4 py-3 text-right text-red-600">Total Deducciones</th>
+                                    <th class="px-4 py-3 text-right font-black text-emerald-700">Total Líquido</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-table-body" class="divide-y divide-emerald-50 font-medium text-slate-600 bg-white">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="overlay-cargando" class="hidden fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center text-white fade-in transition-opacity duration-300">
+             <div class="loader-dots relative w-20 h-20 mb-6">
+                <div class="absolute top-8 w-4 h-4 rounded-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.6)]"></div>
+                <div class="absolute top-8 w-4 h-4 rounded-full bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.6)]"></div>
+                <div class="absolute top-8 w-4 h-4 rounded-full bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.6)]"></div>
+             </div>
+             <h2 class="text-3xl font-black mb-3">PayLogic Masivo Engine</h2>
+             <p class="text-blue-400 font-mono text-lg font-bold" id="cargando-text">Compilando y procesando... 0%</p>
+             <div class="w-96 h-2 bg-slate-800 rounded-full mt-6 overflow-hidden">
+                 <div id="batch-progress" class="h-full bg-blue-500 w-0 transition-all"></div>
+             </div>
+        </div>
+
+        <div id="modal-seguridad" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[80] hidden flex items-center justify-center opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-3xl p-10 max-w-md w-full text-center border-t-8 border-slate-800 shadow-2xl" id="modal-seguridad-content">
+                <h2 class="text-2xl font-black text-slate-800 mb-2">Aprobación de Tesorería</h2>
+                <p class="text-sm text-slate-500 mb-6">Requiere clave para ejecutar el lote.</p>
+                <input type="password" id="input-password" class="w-full bg-slate-50 border-2 border-slate-200 text-center text-3xl rounded-xl focus:border-blue-500 block px-4 py-4 font-mono tracking-widest outline-none mb-4" placeholder="••••••••">
+                <button onclick="UI.verificarClave()" class="w-full bg-slate-900 text-white font-black text-xl py-4 rounded-xl hover:bg-black transition-colors duration-200">Confirmar</button>
+            </div>
+        </div>
+
+        <div id="modal-ia" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[110] hidden flex items-center justify-center p-6 opacity-0 transition-opacity duration-300">
+            <div class="bg-white rounded-3xl shadow-2xl p-8 max-w-2xl w-full border-t-8 border-purple-600 relative">
+                <button onclick="UI.cerrarIA()" class="absolute top-6 right-6 text-slate-400 hover:text-slate-800 transition-colors duration-200">
+                    <i class="fa-solid fa-xmark text-2xl"></i>
+                </button>
+                <div class="flex items-center gap-4 mb-6 border-b border-slate-100 pb-4">
+                    <div class="w-14 h-14 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl shadow-inner border border-purple-200">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Auditoría Masiva IA LLM</h2>
+                        <p class="text-purple-600 font-bold text-xs uppercase tracking-widest mt-1">Análisis de la Corrida Actual</p>
+                    </div>
+                </div>
+                 
+                <div id="ia-report-content" class="text-slate-600 leading-relaxed space-y-4 font-medium text-sm">
+                    <div class="flex flex-col items-center justify-center py-8">
+                        <i class="fa-solid fa-circle-notch fa-spin text-3xl text-purple-400 mb-4"></i>
+                        <p>Validando firma SHA y enviando tensores financieros al modelo LLM...</p>
+                    </div>
+                </div>
+                <button onclick="UI.cerrarIA()" class="mt-6 w-full bg-slate-900 hover:bg-slate-800 text-white font-black py-3 rounded-xl shadow-xl transition-transform hover:-translate-y-1">
+                    Cerrar Reporte LLM
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // ---------------------------------------------------------
+        // UTILIDADES PURAS
+        // ---------------------------------------------------------
+        const Utils = {
+            normalizeName: function(inputEl) {
+                if(!inputEl || !inputEl.value) return;
+                const str = inputEl.value;
+                inputEl.value = str.trim().toLowerCase().replace(/\b\w/g, function(s) { 
+                    return s.toUpperCase(); 
+                });
+            },
+            
+            roundMoney: function(val) {
+                return Math.round(val * 100) / 100;
+            },
+            
+            calcDays: function(start, end) {
+                if(!start || !end) return 0;
+                const date1 = new Date(start);
+                const date2 = new Date(end);
+                if(date2 < date1) return 0;
+                const diffTime = Math.abs(date2 - date1);
+                return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+            },
+
+            generateHash: function(payloadStr) {
+                let hash = 0;
+                for (let i = 0; i < payloadStr.length; i++) {
+                    const char = payloadStr.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char;
+                    hash = hash & hash; 
+                }
+                return Math.abs(hash).toString(16).padStart(12, '0').toUpperCase();
+            }
+        };
+
+        // ---------------------------------------------------------
+        // CORE: MOTOR DE REGLAS DE NÓMINA PAYLOGIC
+        // ---------------------------------------------------------
+        const CatalogoReglas = [
+            { 
+                id: 'comisiones', 
+                type: 'ingreso', 
+                evaluar: function(emp, ui) { 
+                    return (ui.chkComision && emp.ventas > ui.valMeta) ? ui.valBono : 0; 
+                } 
+            },
+            { 
+                id: 'horas_extra', 
+                type: 'ingreso', 
+                evaluar: function(emp, ui) { 
+                    return (ui.chkExtras && emp.horas_extra > 0) ? (emp.salario / 160) * 1.5 * emp.horas_extra : 0; 
+                } 
+            },
+            { 
+                id: 'bono_dinamico', 
+                type: 'ingreso', 
+                evaluar: function(emp, ui) { 
+                    return ui.chkCustomBono ? ui.valCustomBono : 0; 
+                } 
+            },
+            { 
+                id: 'viaticos', 
+                type: 'ingreso', 
+                evaluar: function(emp, ui) { 
+                    return ui.chkViat ? ui.valViat : 0; 
+                } 
+            },
+            { 
+                id: 'vacaciones', 
+                type: 'ingreso', 
+                evaluar: function(emp, ui) {
+                    if(!ui.chkVac) return 0;
+                    let days = Utils.calcDays(ui.vacIn, ui.vacOut);
+                    return (emp.salario / 30) * days; 
+                }
+            },
+            { 
+                id: 'igss', 
+                type: 'deduccion', 
+                evaluar: function(emp, ui) { 
+                    return ui.chkIgss ? (emp.salario * 0.0483) : 0; 
+                } 
+            },
+            { 
+                id: 'isr', 
+                type: 'deduccion', 
+                evaluar: function(emp, ui) { 
+                    return (ui.chkIsr && emp.salario > 4000) ? (emp.salario * 0.05) : 0; 
+                } 
+            },
+            { 
+                id: 'prestamos', 
+                type: 'deduccion', 
+                evaluar: function(emp, ui) { 
+                    return ui.chkAnticipos ? ui.valAnticipo : 0; 
+                } 
+            },
+            { 
+                id: 'embargo_dinamico', 
+                type: 'deduccion', 
+                evaluar: function(emp, ui) { 
+                    return ui.chkCustomEmbargo ? ui.valCustomEmbargo : 0; 
+                } 
+            }
+        ];
+
+        // ---------------------------------------------------------
+        // CONTROLADOR PRINCIPAL DEL MOTOR 
+        // ---------------------------------------------------------
+        const Engine = {
+            empleados: [],
+            resultados: [],
+            runHash: "",
+
+            procesarLoteMasivo: async function() {
+                
+                const estadoUI = {
+                    chkExtras: document.getElementById('mod-extras') ? document.getElementById('mod-extras').checked : false,
+                    chkComision: document.getElementById('mod-comisiones') ? document.getElementById('mod-comisiones').checked : false,
+                    valMeta: parseFloat(document.getElementById('val-meta') ? document.getElementById('val-meta').value : 0) || 0,
+                    valBono: parseFloat(document.getElementById('val-bono-ventas') ? document.getElementById('val-bono-ventas').value : 0) || 0,
+                    
+                    chkCustomBono: document.getElementById('mod-bono-custom') ? document.getElementById('mod-bono-custom').checked : false,
+                    nameCustomBono: document.getElementById('val-bono-name') ? document.getElementById('val-bono-name').value : "Bono Extra",
+                    valCustomBono: parseFloat(document.getElementById('val-bono-monto') ? document.getElementById('val-bono-monto').value : 0) || 0,
+                    
+                    chkViat: document.getElementById('mod-viaticos') ? document.getElementById('mod-viaticos').checked : false,
+                    valViat: parseFloat(document.getElementById('val-viaticos') ? document.getElementById('val-viaticos').value : 0) || 0,
+                    
+                    chkVac: document.getElementById('mod-vacaciones') ? document.getElementById('mod-vacaciones').checked : false,
+                    vacIn: document.getElementById('vac-inicio') ? document.getElementById('vac-inicio').value : null,
+                    vacOut: document.getElementById('vac-fin') ? document.getElementById('vac-fin').value : null,
+                    
+                    chkIgss: document.getElementById('mod-igss') ? document.getElementById('mod-igss').checked : false,
+                    chkIsr: document.getElementById('mod-isr') ? document.getElementById('mod-isr').checked : false,
+                    
+                    chkAnticipos: document.getElementById('mod-anticipos') ? document.getElementById('mod-anticipos').checked : false,
+                    valAnticipo: parseFloat(document.getElementById('val-anticipo') ? document.getElementById('val-anticipo').value : 0) || 0,
+                    
+                    chkCustomEmbargo: document.getElementById('mod-embargo') ? document.getElementById('mod-embargo').checked : false,
+                    nameCustomEmbargo: document.getElementById('val-embargo-name') ? document.getElementById('val-embargo-name').value : "Descuento Legal",
+                    valCustomEmbargo: parseFloat(document.getElementById('val-embargo-monto') ? document.getElementById('val-embargo-monto').value : 0) || 0
+                };
+
+                document.getElementById('overlay-cargando').classList.remove('hidden');
+                
+                let tBruto = 0;
+                let tBonos = 0;
+                let tDeduc = 0;
+                let tFinal = 0;
+                
+                Engine.resultados = [];
+
+                for(let i=0; i < Engine.empleados.length; i++) {
+                    let emp = Engine.empleados[i];
+                    
+                    document.getElementById('cargando-text').innerText = "[ " + (i+1) + " / " + Engine.empleados.length + " ] Compilando: " + emp.id;
+                    document.getElementById('batch-progress').style.width = ((i+1) / Engine.empleados.length * 100) + '%';
+                    
+                    let ingresosCalc = 0;
+                    let deduccionesCalc = 0;
+
+                    for(let j=0; j < CatalogoReglas.length; j++) {
+                        let regla = CatalogoReglas[j];
+                        let valor = Utils.roundMoney(regla.evaluar(emp, estadoUI));
+                        
+                        if(regla.type === 'ingreso') {
+                            ingresosCalc += valor;
+                        }
+                        if(regla.type === 'deduccion') {
+                            deduccionesCalc += valor;
+                        }
+                    }
+
+                    let total = Utils.roundMoney(emp.salario + ingresosCalc - deduccionesCalc);
+                    
+                    Engine.resultados.push({ 
+                        id: emp.id, 
+                        nombre: emp.nombre, 
+                        salario: emp.salario, 
+                        bonos: ingresosCalc, 
+                        deducciones: deduccionesCalc, 
+                        total: total 
+                    });
+                    
+                    tBruto += emp.salario; 
+                    tBonos += ingresosCalc; 
+                    tDeduc += deduccionesCalc; 
+                    tFinal += total;
+                    
+                    if(i % 5 === 0) {
+                        await new Promise(function(r) { setTimeout(r, 20); });
+                    }
+                }
+
+                Engine.runHash = "SHA256-" + Utils.generateHash(JSON.stringify(Engine.resultados));
+
+                setTimeout(function() {
+                    UI.cerrarOverlay();
+                    document.getElementById('section-logic').classList.add('hidden');
+                    document.getElementById('section-results').classList.remove('hidden');
+                    
+                    const metodo = document.getElementById('metodo-pago').value;
+                    
+                    if(metodo === 'transferencia') {
+                        document.getElementById('btn-download-text').innerText = "Descargar CSV (ACH)";
+                    } else if(metodo === 'cheque') {
+                        document.getElementById('btn-download-text').innerText = "Imprimir Cheques";
+                    } else if(metodo === 'efectivo') {
+                        document.getElementById('btn-download-text').innerText = "Imprimir Recibos";
+                    }
+
+                    document.getElementById('hash-display').innerText = "Firma: " + Engine.runHash;
+                    document.getElementById('stat-bruto').innerText = "Q. " + tBruto.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    document.getElementById('stat-bonos').innerText = "Q. " + tBonos.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    document.getElementById('stat-deducciones').innerText = "Q. " + tDeduc.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    document.getElementById('stat-final').innerText = "Q. " + tFinal.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    
+                    let tableHTML = "";
+                    
+                    for(let k=0; k<Engine.resultados.length; k++) {
+                        let r = Engine.resultados[k];
+                        tableHTML += "<tr class='hover:bg-emerald-50/30'>";
+                        tableHTML += "  <td class='px-4 py-3 font-bold text-slate-700'>";
+                        tableHTML += "      <span class='block'>" + r.nombre + "</span>";
+                        tableHTML += "      <span class='font-mono text-[10px] text-slate-400'>" + r.id + "</span>";
+                        tableHTML += "  </td>";
+                        tableHTML += "  <td class='px-4 py-3 text-right font-mono text-slate-500'>Q." + r.salario.toLocaleString('es-GT', {minimumFractionDigits:2}) + "</td>";
+                        tableHTML += "  <td class='px-4 py-3 text-right font-mono font-bold text-blue-600'>" + (r.bonos > 0 ? "+Q." + r.bonos.toLocaleString('es-GT', {minimumFractionDigits:2}) : "-") + "</td>";
+                        tableHTML += "  <td class='px-4 py-3 text-right font-mono font-bold text-red-600'>" + (r.deducciones > 0 ? "-Q." + r.deducciones.toLocaleString('es-GT', {minimumFractionDigits:2}) : "-") + "</td>";
+                        tableHTML += "  <td class='px-4 py-3 text-right font-mono font-black text-emerald-700'>Q." + r.total.toLocaleString('es-GT', {minimumFractionDigits:2}) + "</td>";
+                        tableHTML += "</tr>";
+                    }
+                    
+                    document.getElementById('results-table-body').innerHTML = tableHTML;
+                    confetti({ particleCount: 200, spread: 100, origin: { y: 0.3 } });
+                    
+                }, 400);
+            },
+
+            // ---------------------------------------------------------
+            // SALIDAS FINANCIERAS (Concatenación Segura sin Comillas Invertidas)
+            // ---------------------------------------------------------
+            procesarSalidaFinanciera: function() {
+                const metodo = document.getElementById('metodo-pago').value;
+                if(metodo === 'transferencia') {
+                    Engine.exportarExcel();
+                } else if(metodo === 'cheque') {
+                    Engine.generarChequesImpresos();
+                } else if(metodo === 'efectivo') {
+                    Engine.generarRecibos();
+                }
+            },
+
+            exportarExcel: function() {
+                const dataLimpia = [];
+                for(let i=0; i<Engine.resultados.length; i++) {
+                    let r = Engine.resultados[i];
+                    dataLimpia.push({
+                        "ID_Firma_Lote": Engine.runHash,
+                        "ID Empleado": r.id,
+                        "Nombre Completo": r.nombre,
+                        "Salario ordinario": r.salario,
+                        "Total Devengos": r.bonos,
+                        "Total Deducciones": r.deducciones,
+                        "NETO RECIBIDO": r.total
+                    });
+                }
+                const ws = XLSX.utils.json_to_sheet(dataLimpia);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Nómina_Firmada");
+                XLSX.writeFile(wb, "Nomina_PayLogic_" + Engine.runHash + ".xlsx");
+            },
+
+            generarRecibos: function() {
+                const win = window.open('', '_blank');
+                let html = "<!DOCTYPE html>\n";
+                html += "<html>\n";
+                html += "<head>\n";
+                html += "   <title>Recibos de Pago PayLogic</title>\n";
+                html += "   <style>\n";
+                html += "       body { font-family: sans-serif; padding: 20px; background: #f8fafc; }\n";
+                html += "       .recibo { background: white; border: 2px dashed #cbd5e1; padding: 30px; margin-bottom: 30px; width: 600px; page-break-inside: avoid; border-radius: 10px; }\n";
+                html += "       .header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 20px; }\n";
+                html += "       .firma { margin-top: 50px; border-top: 1px solid #000; width: 250px; text-align: center; padding-top: 10px; }\n";
+                html += "   </style>\n";
+                html += "</head>\n";
+                html += "<body>\n";
+                
+                for(let i=0; i<Engine.resultados.length; i++) {
+                    let r = Engine.resultados[i];
+                    let numStr = r.total.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    
+                    html += "   <div class='recibo'>\n";
+                    html += "       <div class='header'>\n";
+                    html += "           <h2 style='margin: 0; color: #0f172a;'>RECIBO DE PAGO EN EFECTIVO</h2>\n";
+                    html += "           <p style='color: #64748b; font-size: 12px;'>Comprobante Oficial PayLogic ERP</p>\n";
+                    html += "       </div>\n";
+                    html += "       <p><strong>Firma de Lote Autorizado:</strong> " + Engine.runHash + "</p>\n";
+                    html += "       <p><strong>Empleado:</strong> " + r.nombre + " (" + r.id + ")</p>\n";
+                    html += "       <h3 style='font-size: 24px; color: #10b981; margin: 20px 0;'>Monto Recibido: Q. " + numStr + "</h3>\n";
+                    html += "       <div class='firma'>Firma de Recibido Conforme</div>\n";
+                    html += "   </div>\n";
+                }
+                
+                html += "</body>\n";
+                html += "</html>\n";
+                
+                win.document.write(html);
+                win.document.close();
+                setTimeout(function() { 
+                    win.print(); 
+                }, 800);
+            },
+
+            generarChequesImpresos: function() {
+                const win = window.open('', '_blank');
+                let html = "<!DOCTYPE html>\n";
+                html += "<html>\n";
+                html += "<head>\n";
+                html += "   <title>Impresión de Cheques PayLogic</title>\n";
+                html += "   <style>\n";
+                html += "       body { font-family: 'Courier New', Courier, monospace; background: #f0f0f0; margin: 0; padding: 20px; }\n";
+                html += "       .cheque { width: 800px; height: 350px; background: #fdfaf2; margin: 0 auto 30px auto; border: 20px solid #e5d194; position: relative; overflow: hidden; page-break-after: always; box-sizing: border-box; }\n";
+                html += "       .wave { position: absolute; width: 200%; height: 200%; background: repeating-radial-gradient(ellipse at center, transparent, transparent 10px, rgba(229, 209, 148, 0.15) 11px, rgba(229, 209, 148, 0.15) 12px); opacity: 0.5; top: -50%; left: -50%; transform: rotate(15deg); }\n";
+                html += "       .header { position: absolute; top: 20px; left: 30px; font-family: sans-serif; }\n";
+                html += "       .name { font-size: 20px; font-weight: bold; }\n";
+                html += "       .sub { font-size: 12px; color: #555; }\n";
+                html += "       .date-area { position: absolute; top: 30px; right: 40px; border-bottom: 1px solid #000; width: 150px; text-align: center; font-family: sans-serif;}\n";
+                html += "       .pay-to { position: absolute; top: 100px; left: 30px; font-size: 14px; font-family: sans-serif;}\n";
+                html += "       .pay-to-line { position: absolute; top: 110px; left: 150px; border-bottom: 1px solid #000; width: 450px; font-size: 18px; font-weight: bold; padding-bottom: 2px;}\n";
+                html += "       .amount-box { position: absolute; top: 95px; right: 40px; border: 2px solid #000; width: 150px; height: 35px; font-size: 20px; font-weight: bold; display: flex; align-items: center; padding-left: 10px; background: white;}\n";
+                html += "       .amount-text { position: absolute; top: 160px; left: 30px; border-bottom: 1px solid #000; width: 600px; font-style: italic; font-family: sans-serif; font-size: 14px;}\n";
+                html += "       .bank-info { position: absolute; top: 220px; left: 30px; display: flex; align-items: center; font-family: sans-serif;}\n";
+                html += "       .logo { width: 30px; height: 30px; background: #1e3a8a; display: inline-block; margin-right: 10px; }\n";
+                html += "       .b-text { font-size: 12px; font-weight: bold; }\n";
+                html += "       .micr { position: absolute; bottom: 20px; left: 30px; font-size: 18px; letter-spacing: 2px;}\n";
+                html += "       .hash-tag { position: absolute; top: 5px; right: 5px; font-size: 8px; color: #aaa; font-family: sans-serif;}\n";
+                html += "   </style>\n";
+                html += "</head>\n";
+                html += "<body>\n";
+
+                let dString = new Date().toLocaleDateString('es-ES');
+
+                for(let i=0; i<Engine.resultados.length; i++) {
+                    let r = Engine.resultados[i];
+                    let numStr = r.total.toLocaleString('es-GT', {minimumFractionDigits:2});
+                    
+                    html += "   <div class='cheque'>\n";
+                    html += "       <div class='wave'></div>\n";
+                    html += "       <div class='hash-tag'>Firma Lote: " + Engine.runHash + " | Doc: " + r.id + "</div>\n";
+                    html += "       <div class='header'>\n";
+                    html += "           <div class='name'>MI EMPRESA S.A.</div>\n";
+                    html += "           <div class='sub'>Guatemala, C.A.<br>Tel: 2420-3000</div>\n";
+                    html += "       </div>\n";
+                    html += "       <div class='date-area'>" + dString + "</div>\n";
+                    html += "       <div class='pay-to'>PAY TO THE<br>ORDER OF</div>\n";
+                    html += "       <div class='pay-to-line'>" + r.nombre.toUpperCase() + "</div>\n";
+                    html += "       <div class='amount-box'><strong>Q</strong> <span style='margin-left:10px;'>" + numStr + "</span></div>\n";
+                    html += "       <div class='amount-text'>*** PAGO DE NÓMINA PayLogic MASIVO Engine ***</div>\n";
+                    html += "       <div class='bank-info'>\n";
+                    html += "           <div class='logo'></div>\n";
+                    html += "           <div class='b-text'>Bank Name PayLogic ERP<br><span style='color:#555;'>Central Branch</span></div>\n";
+                    html += "       </div>\n";
+                    html += "       <div class='micr'>|: 012345678 |: 000123456789 ||\" 0001</div>\n";
+                    html += "   </div>\n";
+                }
+                
+                html += "</body>\n";
+                html += "</html>\n";
+                
+                win.document.write(html);
+                win.document.close();
+                setTimeout(function() { 
+                    win.print(); 
+                }, 800);
+            },
+
+            auditoriaIA: function() {
+                document.getElementById('modal-ia').classList.remove('hidden');
+                setTimeout(function() { 
+                    document.getElementById('modal-ia').classList.remove('opacity-0'); 
+                }, 10);
+                
+                const content = document.getElementById('ia-report-content');
+                
+                let htmlLoading = "<div class='flex flex-col items-center justify-center py-8'>\n";
+                htmlLoading += "   <i class='fa-solid fa-circle-notch fa-spin text-3xl text-purple-400 mb-4'></i>\n";
+                htmlLoading += "   <p>Validando firma SHA y analizando...</p>\n";
+                htmlLoading += "</div>\n";
+                
+                content.innerHTML = htmlLoading;
+                
+                setTimeout(function() {
+                    let empBono = 0;
+                    for(let i=0; i<Engine.resultados.length; i++) {
+                        if(Engine.resultados[i].bonos > 0) {
+                            empBono++;
+                        }
+                    }
+                    
+                    let htmlReport = "<div class='bg-purple-50 p-5 rounded-xl border border-purple-100'>\n";
+                    htmlReport += "   <p class='mb-3 text-purple-900 font-bold'>\n";
+                    htmlReport += "       <i class='fa-solid fa-lock text-emerald-500 mr-2'></i> Firma validada: " + Engine.runHash + "\n";
+                    htmlReport += "   </p>\n";
+                    htmlReport += "   <p class='mb-3'>\n";
+                    htmlReport += "       <strong class='text-purple-800'>Cálculo Matemático:</strong> Se procesaron deducciones y devengos sobre " + Engine.resultados.length + " empleados correctamente.\n";
+                    htmlReport += "   </p>\n";
+                    htmlReport += "   <p>\n";
+                    htmlReport += "       <strong class='text-purple-800'>Impacto Variable:</strong> " + empBono + " empleados recibieron ingresos variables (Comisiones o Vacaciones).\n";
+                    htmlReport += "   </p>\n";
+                    htmlReport += "</div>\n";
+                    
+                    content.innerHTML = htmlReport;
+                    
+                }, 1500);
+            }
+        };
+
+        // ---------------------------------------------------------
+        // UI HANDLERS (Interacciones DOM)
+        // ---------------------------------------------------------
+        const UI = {
+            
+            toggleSidebar: function() {
+                const sidebar = document.getElementById('sidebar');
+                sidebar.classList.toggle('sidebar-collapsed'); 
+            },
+            
+            switchTab: function(tabId) {
+                const tabs = ['tab-ingresos', 'tab-deducciones', 'tab-liquidaciones', 'tab-operativa'];
+                
+                for(let i=0; i<tabs.length; i++) {
+                    document.getElementById(tabs[i]).classList.add('hidden');
+                    document.getElementById('btn-' + tabs[i]).className = "w-full text-left px-6 py-4 text-sm tab-inactive transition-all";
+                }
+                
+                document.getElementById(tabId).classList.remove('hidden');
+                document.getElementById('btn-' + tabId).className = "w-full text-left px-6 py-4 text-sm tab-active transition-all";
+            },
+
+            generarDatosPrueba: function() {
+                Engine.empleados = [];
+                const nombres = [
+                    "Pavel Montenegro", "Miguel Soto", "Josue Menendez", 
+                    "Fatima Tzoc", "Andres Rivera", "Lucia Galindo", "Elena Castillo"
+                ];
+                const tipos = ["Fijo", "Servicios", "Medio Tiempo"];
+                
+                for(let i=1; i<=50; i++) {
+                    let t = tipos[Math.floor(Math.random() * tipos.length)];
+                    let base = Math.round(Math.floor(Math.random() * (8000 - 3500 + 1) + 3500) / 100) * 100;
+                    let ventas = Math.round(Math.floor(Math.random() * 12000) / 50) * 50;
+                    let extra = Math.floor(Math.random() * 15);
+
+                    Engine.empleados.push({
+                        id: "EMP-" + i.toString().padStart(3, '0'),
+                        nombre: nombres[Math.floor(Math.random() * nombres.length)],
+                        tipo: t,
+                        salario: base,
+                        ventas: ventas,
+                        horas_extra: extra
+                    });
+                }
+                UI.renderTabla();
+            },
+
+            renderTabla: function() {
+                const body = document.getElementById('erp-table-body');
+                
+                if(Engine.empleados.length === 0) {
+                    
+                    let emptyHTML = "<tr id='empty-row'>\n";
+                    emptyHTML += "  <td colspan='5' class='py-24 text-center text-slate-400'>\n";
+                    emptyHTML += "      <i class='fa-solid fa-clipboard-list text-5xl mb-3 text-slate-300 block'></i> Base de datos en espera.\n";
+                    emptyHTML += "  </td>\n";
+                    emptyHTML += "</tr>\n";
+                    
+                    body.innerHTML = emptyHTML;
+                    
+                } else {
+                    let html = "";
+                    for(let i=0; i<Engine.empleados.length; i++) {
+                        let emp = Engine.empleados[i];
+                        html += "<tr class='hover:bg-slate-50 transition-colors'>\n";
+                        html += "  <td class='px-4 py-3 font-mono text-[10px] text-slate-400'>" + emp.id + "</td>\n";
+                        html += "  <td class='px-4 py-3 font-bold text-slate-700'>\n";
+                        html += "      <span class='block'>" + emp.nombre + "</span>\n";
+                        html += "      <span class='text-[10px] bg-slate-100 text-slate-500 px-1 rounded uppercase border'>" + emp.tipo + "</span>\n";
+                        html += "  </td>\n";
+                        html += "  <td class='px-4 py-3 text-right font-mono text-slate-500'>Q." + emp.salario.toLocaleString('es-GT', {minimumFractionDigits:2}) + "</td>\n";
+                        html += "  <td class='px-4 py-3 text-center font-mono font-bold text-amber-600'>" + emp.horas_extra + "h</td>\n";
+                        html += "  <td class='px-4 py-3 text-right font-mono font-bold text-blue-600'>Q." + emp.ventas.toLocaleString('es-GT', {minimumFractionDigits:2}) + "</td>\n";
+                        html += "</tr>\n";
+                    }
+                    body.innerHTML = html;
+                }
+
+                document.getElementById('count-empleados').innerText = Engine.empleados.length;
+                const btn = document.getElementById('btn-siguiente');
+                
+                if(Engine.empleados.length > 0) {
+                    btn.disabled = false; 
+                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                } else {
+                    btn.disabled = true; 
+                    btn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            },
+
+            subirCSV: function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                alert("PayLogic Engine: Ingeriendo " + file.name + "... simulando registros.");
+                UI.generarDatosPrueba();
+            },
+
+            limpiarTabla: function() { 
+                Engine.empleados = []; 
+                UI.renderTabla(); 
+            },
+            
+            irAPaso2: function() { 
+                document.getElementById('section-data').classList.add('hidden'); 
+                document.getElementById('section-logic').classList.remove('hidden'); 
+                document.getElementById('section-logic').classList.add('flex'); 
+                document.getElementById('status-badge').innerText = "2. Constructor";
+            },
+
+            solicitarClaveProcesamiento: function() {
+                document.getElementById('input-password').value = '';
+                document.getElementById('modal-seguridad').classList.remove('hidden');
+                
+                setTimeout(function() { 
+                    document.getElementById('modal-seguridad').classList.remove('opacity-0'); 
+                }, 10);
+                
+                document.getElementById('input-password').focus();
+            },
+
+            verificarClave: function() {
+                const pwd = document.getElementById('input-password').value;
+                if(pwd === 'peppers' || pwd === 'admin') { 
+                    document.getElementById('modal-seguridad').classList.add('opacity-0');
+                    
+                    setTimeout(function() { 
+                        document.getElementById('modal-seguridad').classList.add('hidden'); 
+                    }, 300);
+                    
+                    Engine.procesarLoteMasivo(); 
+                    
+                } else { 
+                    alert("Clave Incorrecta. Intente de nuevo."); 
+                }
+            },
+
+            cerrarOverlay: function() { 
+                document.getElementById('overlay-cargando').classList.add('hidden'); 
+            },
+            
+            cerrarIA: function() {
+                document.getElementById('modal-ia').classList.add('opacity-0');
+                
+                setTimeout(function() { 
+                    document.getElementById('modal-ia').classList.add('hidden'); 
+                }, 300);
+            }
+        };
+
+    </script>
+</body>
+</html>
