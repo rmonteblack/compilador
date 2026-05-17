@@ -6,7 +6,7 @@
     <title>PayLogic ERP | Administración de Nómina</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -95,7 +95,7 @@
         .markdown-content strong { color: #0f172a; }
         .markdown-content ul { list-style-type: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
 
-        /* Estructura para el sistema de alertas (Toasts) sin usar el nativo alert() */
+        /* Estructura para el sistema de alertas (Toasts) */
         #toast-container { 
             position: fixed; 
             top: 20px; 
@@ -493,16 +493,20 @@
                         
                         <div class="flex flex-wrap gap-3 items-center">
                             
+                            <button onclick="UI.mostrarCredenciales()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-all flex items-center">
+                                <i class="fa-solid fa-key mr-2 text-amber-400"></i> Accesos (PINs)
+                            </button>
+                            
                             <button onclick="UI.descartarCorrida()" class="bg-white border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-500 font-bold py-3 px-4 rounded-xl transition-all" title="Eliminar este cálculo">
-                                <i class="fa-solid fa-xmark mr-1"></i> Descartar y Volver
+                                <i class="fa-solid fa-xmark mr-1"></i> Descartar
                             </button>
                             
-                            <button onclick="IA.abrirChat()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-5 rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center">
-                                <i class="fa-solid fa-brain mr-2"></i> Asistente de Auditoría IA
+                            <button onclick="IA.abrirChat()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-purple-600/30 transition-all flex items-center">
+                                <i class="fa-solid fa-brain mr-2"></i> IA
                             </button>
                             
-                            <button onclick="Engine.procesarSalidaFinanciera()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center">
-                                <i class="fa-solid fa-download mr-2"></i> <span id="btn-download-text">Exportar Salida</span>
+                            <button onclick="UI.enviarAFinanzas()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-6 rounded-xl shadow-lg shadow-emerald-600/30 transition-all flex items-center">
+                                <i class="fa-solid fa-paper-plane mr-2"></i> Enviar a Finanzas
                             </button>
                         </div>
                     </div>
@@ -576,6 +580,49 @@
         </div>
     </div>
 
+    <div id="modal-credenciales" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[110] hidden flex items-center justify-center p-4 md:p-6 opacity-0 transition-opacity">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl flex flex-col border-t-8 border-amber-500 relative overflow-hidden max-h-[80vh]">
+            
+            <div class="flex items-center justify-between p-4 md:p-6 border-b border-slate-100 bg-slate-50">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-xl flex items-center justify-center text-xl shadow-inner border border-amber-200">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight">Distribución de Accesos</h2>
+                        <p class="text-amber-600 font-bold text-xs uppercase tracking-widest">Confidencial RRHH</p>
+                    </div>
+                </div>
+                <button onclick="UI.cerrarCredenciales()" class="text-slate-400 hover:text-slate-800 transition-colors bg-white p-2 rounded-lg border border-slate-200 shadow-sm">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+             
+            <div class="flex-1 p-6 overflow-y-auto bg-white">
+                <p class="text-slate-600 mb-4 text-sm">Distribuye de manera privada estos Códigos PIN a cada empleado. Son requeridos para que puedan acceder al <strong>Portal del Empleado</strong> y firmar sus recibos correspondientes al lote actual.</p>
+                
+                <table class="w-full text-left border-collapse text-sm border border-slate-200 rounded-lg overflow-hidden">
+                    <thead class="bg-slate-100 text-slate-600 text-xs uppercase font-bold">
+                        <tr>
+                            <th class="px-4 py-3 border-b border-slate-200">ID Empleado</th>
+                            <th class="px-4 py-3 border-b border-slate-200">Nombre Legal</th>
+                            <th class="px-4 py-3 border-b border-slate-200 text-center">PIN Generado (Temporal)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-pins-body" class="divide-y divide-slate-100 font-mono text-slate-700">
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="p-4 bg-slate-50 border-t border-slate-200 text-right">
+                <button onclick="UI.cerrarCredenciales()" class="bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 px-6 rounded-xl transition-all">
+                    Cerrar Panel
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
     <div id="modal-ia" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[110] hidden flex items-center justify-center p-4 md:p-6 opacity-0 transition-opacity">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col border-t-8 border-purple-600 relative overflow-hidden">
             
@@ -619,7 +666,7 @@
 
     <script>
         
-        // La URL de tu backend express que contiene las rutas de API
+        // La URL de tu backend express en RENDER
         const API_URL = "https://compiladorpaylogic.onrender.com/api";
 
         // ---------------------------------------------------------
@@ -627,9 +674,7 @@
         // ---------------------------------------------------------
         const Utils = {
             
-            // Función de Alertas Toasts Elegantes (Reemplazo de alert)
             showToast: function(mensaje, tipo) {
-                // tipo = 'success', 'error', 'info'
                 if (!tipo) {
                     tipo = 'success';
                 }
@@ -646,12 +691,10 @@
                 
                 container.appendChild(toast);
                 
-                // Mostrar animación de entrada suave
                 setTimeout(function() { 
                     toast.classList.add('show'); 
                 }, 10);
                 
-                // Limpiar del DOM luego de 4 segundos
                 setTimeout(function() {
                     toast.classList.remove('show');
                     setTimeout(function() { 
@@ -660,7 +703,6 @@
                 }, 4000);
             },
 
-            // Formateo de nombres para evitar basura en DB
             normalizeName: function(inputEl) {
                 if(!inputEl || !inputEl.value) {
                     return;
@@ -671,28 +713,25 @@
                 });
             },
             
-            // Redondeo exacto para prevenir errores de céntimos en miles de operaciones
             roundMoney: function(val) {
                 return Math.round(val * 100) / 100;
             },
             
-            // Calculo contable de días proporcionales de asueto/vacaciones
             calcDays: function(start, end) {
                 if(!start || !end) {
                     return 0;
                 }
-                const date1 = new Date(start);
-                const date2 = new Date(end);
+                const d1 = new Date(start);
+                const d2 = new Date(end);
                 
-                if(date2 < date1) {
+                if(d2 < d1) {
                     return 0;
                 }
                 
-                const diffTime = Math.abs(date2 - date1);
+                const diffTime = Math.abs(d2 - d1);
                 return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
             },
 
-            // Hashing criptográfico simulado nivel Cliente (Seguridad Visual)
             generateHash: function(payloadStr) {
                 let hash = 0;
                 for (let i = 0; i < payloadStr.length; i++) {
@@ -812,7 +851,6 @@
 
             procesarLoteMasivo: async function() {
                 
-                // Mapeo Estricto de Controles UI a Objeto de Memoria
                 const estadoUI = {
                     chkExtras: document.getElementById('mod-extras') ? document.getElementById('mod-extras').checked : false,
                     chkComision: document.getElementById('mod-comisiones') ? document.getElementById('mod-comisiones').checked : false,
@@ -839,7 +877,6 @@
                     valCustomEmbargo: parseFloat(document.getElementById('val-embargo-monto') ? document.getElementById('val-embargo-monto').value : 0) || 0
                 };
 
-                // Invocar Pantalla de Carga
                 document.getElementById('overlay-cargando').classList.remove('hidden');
                 
                 let tBruto = 0;
@@ -849,14 +886,12 @@
                 
                 Engine.resultados = [];
 
-                // Evaluación Matemática
                 for(let i=0; i < Engine.empleados.length; i++) {
                     let emp = Engine.empleados[i];
                     
                     document.getElementById('cargando-text').innerText = "[ " + (i+1) + " / " + Engine.empleados.length + " ] Validando Árbol de Reglas: " + emp.id;
                     document.getElementById('batch-progress').style.width = ((i+1) / Engine.empleados.length * 100) + '%';
                     
-                    // Inicializar desglose financiero en cero
                     let desglose = {
                         horas_extra: 0,
                         comisiones: 0,
@@ -872,18 +907,15 @@
                     let ingresosCalc = 0;
                     let deduccionesCalc = 0;
 
-                    // Correr el Catálogo
                     for(let j=0; j < CatalogoReglas.length; j++) {
                         let regla = CatalogoReglas[j];
                         let valor = Utils.roundMoney(regla.evaluar(emp, estadoUI));
                         
                         if(valor > 0) {
-                            // Asignar al Breakdown Dictionary
                             if (desglose[regla.id] !== undefined) {
                                 desglose[regla.id] = valor;
                             }
                             
-                            // Acumular Totales de la Boleta
                             if(regla.type === 'ingreso') {
                                 ingresosCalc += valor;
                             }
@@ -893,24 +925,20 @@
                         }
                     }
 
-                    // Aritmetica Final de Boleta
                     let total = Utils.roundMoney(emp.salario + ingresosCalc - deduccionesCalc);
                     
-                    // Generar Pin Secreto para Aprobación en Portal
                     let pinGenerado = Math.floor(100000 + Math.random() * 900000).toString();
                     
-                    // Establecer Vencimiento
                     let limitDateObj = new Date();
                     limitDateObj.setDate(limitDateObj.getDate() + 3);
 
-                    // Push a DB en RAM
                     Engine.resultados.push({
                         id: emp.id,
                         nombre: emp.nombre,
                         salario: emp.salario,
-                        bonos: ingresosCalc,         // Suma global
-                        deducciones: deduccionesCalc, // Suma global
-                        desglose: desglose,          // Detalles
+                        bonos: ingresosCalc,         
+                        deducciones: deduccionesCalc, 
+                        desglose: desglose,          
                         total: total,
                         pin: pinGenerado,
                         status: 'Pendiente',
@@ -922,7 +950,6 @@
                     tDeduc += deduccionesCalc; 
                     tFinal += total;
                     
-                    // Efecto Visual de Transacción Lenta
                     if(i % 5 === 0) {
                         await new Promise(function(resolve) { 
                             setTimeout(resolve, 20); 
@@ -930,17 +957,11 @@
                     }
                 }
 
-                // Generar la Firma final inmutable
+                // Generar la Firma
                 Engine.runHash = "SHA-" + Utils.generateHash(JSON.stringify(Engine.resultados));
 
-                console.log("=========================================");
-                console.log("PINS DE APROBACIÓN (ENTREGAR AL EMPLEADO)");
-                console.log("=========================================");
-                for(let k=0; k<Engine.resultados.length; k++) {
-                    console.log(`EMPLEADO: ${Engine.resultados[k].id}  | PIN: ${Engine.resultados[k].pin}`);
-                }
+                // Ya NO imprimimos PINs en consola por seguridad (Se quitó el console.log)
                 
-                // Intento de Escritura al Backend API (server.js)
                 try {
                     const reqOptions = {
                         method: 'POST',
@@ -966,7 +987,6 @@
                     Utils.showToast("Cálculo realizado de manera offline. Verifica que server.js se esté ejecutando en tu terminal.", "info");
                 }
 
-                // Renderizar los resultados
                 setTimeout(function() {
                     
                     UI.cerrarOverlay();
@@ -981,7 +1001,7 @@
                     } else if(metodo === 'cheque') {
                         document.getElementById('btn-download-text').innerText = "Imprimir Formatos";
                     } else if(metodo === 'efectivo') {
-                        document.getElementById('btn-download-text').innerText = "Generar Recibos Caja";
+                        document.getElementById('btn-download-text').innerText = "Generar Recibos";
                     }
 
                     document.getElementById('hash-display').innerText = "Sello Fijo: " + Engine.runHash;
@@ -995,7 +1015,6 @@
                     for(let x=0; x<Engine.resultados.length; x++) {
                         let r = Engine.resultados[x];
                         
-                        // Estado Evaluativo
                         let badgeHTML = "";
                         if(r.status === 'Pendiente') {
                             badgeHTML = "<span class='text-[9px] bg-amber-100 text-amber-700 px-1 rounded uppercase border border-amber-200'>Pendiente Firma</span>";
@@ -1003,7 +1022,6 @@
                             badgeHTML = "<span class='text-[9px] bg-emerald-100 text-emerald-700 px-1 rounded uppercase border border-emerald-200'>Autorizado</span>";
                         }
 
-                        // Formateo Seguro para Tabla de Resumen
                         htmlTr += "<tr class='hover:bg-slate-50 transition-colors' id='tr-" + r.id + "'>\n";
                         htmlTr += "  <td class='px-4 py-3'>\n";
                         htmlTr += "      <span class='block font-bold text-slate-700'>" + r.nombre + " " + badgeHTML + "</span>\n";
@@ -1012,7 +1030,6 @@
                         
                         htmlTr += "  <td class='px-4 py-3 text-right font-mono text-slate-600'>Q." + r.salario.toLocaleString('es-GT', {minimumFractionDigits:2}) + "</td>\n";
                         
-                        // Extraemos datos específicos si existen
                         let valExtra = r.desglose.horas_extra > 0 ? "+Q." + r.desglose.horas_extra.toLocaleString('es-GT', {minimumFractionDigits:2}) : "-";
                         let valComis = r.desglose.comisiones > 0 ? "+Q." + r.desglose.comisiones.toLocaleString('es-GT', {minimumFractionDigits:2}) : "-";
                         let valBonoFijo = r.desglose.bono_fijo > 0 ? "+Q." + r.desglose.bono_fijo.toLocaleString('es-GT', {minimumFractionDigits:2}) : "-";
@@ -1032,9 +1049,6 @@
                 }, 400);
             },
 
-            // ---------------------------------------------------------
-            // EXPORTACIONES A SISTEMAS BANCARIOS / IMPRESIÓN
-            // ---------------------------------------------------------
             procesarSalidaFinanciera: function() {
                 const docSel = document.getElementById('metodo-pago');
                 const metodo = docSel ? docSel.value : 'transferencia';
@@ -1073,99 +1087,59 @@
 
             generarRecibos: function() {
                 const win = window.open('', '_blank');
-                let htmlDocument = "<!DOCTYPE html>\n";
-                htmlDocument += "<html>\n";
-                htmlDocument += "<head>\n";
-                htmlDocument += "   <title>Recibos de Pago Institucionales</title>\n";
-                htmlDocument += "   <style>\n";
-                htmlDocument += "       body { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f8fafc; display: flex; flex-direction: column; align-items: center;}\n";
-                htmlDocument += "       .recibo { background: white; border: 2px solid #cbd5e1; padding: 40px; margin-bottom: 40px; width: 650px; page-break-inside: avoid; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}\n";
-                htmlDocument += "       .header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px; }\n";
-                htmlDocument += "       .title { margin: 0; color: #0f172a; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;}\n";
-                htmlDocument += "       .subtitle { color: #64748b; font-size: 14px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;}\n";
-                htmlDocument += "       .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 5px;}\n";
-                htmlDocument += "       .label { color: #64748b; font-weight: 600; }\n";
-                htmlDocument += "       .value { font-weight: bold; color: #1e293b; }\n";
-                htmlDocument += "       .total-box { background: #f0fdf4; border: 1px solid #10b981; padding: 20px; border-radius: 8px; text-align: center; margin-top: 25px;}\n";
-                htmlDocument += "       .total-val { font-size: 32px; color: #047857; font-weight: 900; margin: 5px 0;}\n";
-                htmlDocument += "       .firma-box { margin-top: 60px; border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 10px; margin-left: auto; margin-right: auto; color: #475569; font-weight: bold;}\n";
-                htmlDocument += "   </style>\n";
-                htmlDocument += "</head>\n";
-                htmlDocument += "<body>\n";
+                let htmlDocument = "<!DOCTYPE html>\n<html>\n<head>\n<title>Recibos de Pago Institucionales</title>\n";
+                htmlDocument += "<style>\nbody { font-family: 'Segoe UI', sans-serif; padding: 40px; background: #f8fafc; display: flex; flex-direction: column; align-items: center;}\n";
+                htmlDocument += ".recibo { background: white; border: 2px solid #cbd5e1; padding: 40px; margin-bottom: 40px; width: 650px; page-break-inside: avoid; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}\n";
+                htmlDocument += ".header { text-align: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px; }\n";
+                htmlDocument += ".title { margin: 0; color: #0f172a; font-size: 28px; font-weight: 900; letter-spacing: -0.5px;}\n";
+                htmlDocument += ".subtitle { color: #64748b; font-size: 14px; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;}\n";
+                htmlDocument += ".row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 16px; border-bottom: 1px dashed #f1f5f9; padding-bottom: 5px;}\n";
+                htmlDocument += ".label { color: #64748b; font-weight: 600; }\n.value { font-weight: bold; color: #1e293b; }\n";
+                htmlDocument += ".total-box { background: #f0fdf4; border: 1px solid #10b981; padding: 20px; border-radius: 8px; text-align: center; margin-top: 25px;}\n";
+                htmlDocument += ".total-val { font-size: 32px; color: #047857; font-weight: 900; margin: 5px 0;}\n";
+                htmlDocument += ".firma-box { margin-top: 60px; border-top: 1px solid #000; width: 300px; text-align: center; padding-top: 10px; margin-left: auto; margin-right: auto; color: #475569; font-weight: bold;}\n";
+                htmlDocument += "</style>\n</head>\n<body>\n";
                 
                 for(let i=0; i<Engine.resultados.length; i++) {
                     let r = Engine.resultados[i];
                     let totalFormat = r.total.toLocaleString('es-GT', {minimumFractionDigits:2});
                     
-                    htmlDocument += "   <div class='recibo'>\n";
-                    htmlDocument += "       <div class='header'>\n";
-                    htmlDocument += "           <h2 class='title'>RECIBO COMPROBANTE DE PAGO</h2>\n";
-                    htmlDocument += "           <p class='subtitle'>Documento Oficial de Nómina</p>\n";
-                    htmlDocument += "       </div>\n";
-                    
-                    htmlDocument += "       <div class='row'>\n";
-                    htmlDocument += "           <span class='label'>Firma Electrónica Lote:</span>\n";
-                    htmlDocument += "           <span class='value' style='font-family: monospace; font-size: 12px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;'>" + Engine.runHash + "</span>\n";
-                    htmlDocument += "       </div>\n";
-                    
-                    htmlDocument += "       <div class='row'>\n";
-                    htmlDocument += "           <span class='label'>Identificación Fiscal:</span>\n";
-                    htmlDocument += "           <span class='value'>" + r.id + "</span>\n";
-                    htmlDocument += "       </div>\n";
-                    
-                    htmlDocument += "       <div class='row'>\n";
-                    htmlDocument += "           <span class='label'>Nombre a favor de:</span>\n";
-                    htmlDocument += "           <span class='value'>" + r.nombre.toUpperCase() + "</span>\n";
-                    htmlDocument += "       </div>\n";
-                    
-                    htmlDocument += "       <div class='total-box'>\n";
-                    htmlDocument += "           <div style='color: #059669; font-weight: bold; font-size: 12px; text-transform: uppercase;'>SUMA LÍQUIDA ACREDITADA</div>\n";
-                    htmlDocument += "           <div class='total-val'>Q. " + totalFormat + "</div>\n";
-                    htmlDocument += "       </div>\n";
-                    
-                    htmlDocument += "       <div class='firma-box'>\n";
-                    htmlDocument += "           Firma de Conformidad del Beneficiario\n";
-                    htmlDocument += "       </div>\n";
-                    htmlDocument += "   </div>\n";
+                    htmlDocument += "<div class='recibo'>\n";
+                    htmlDocument += "<div class='header'>\n<h2 class='title'>RECIBO COMPROBANTE DE PAGO</h2>\n<p class='subtitle'>Documento Oficial de Nómina</p>\n</div>\n";
+                    htmlDocument += "<div class='row'>\n<span class='label'>Firma Electrónica Lote:</span>\n<span class='value' style='font-family: monospace; font-size: 12px; background: #e2e8f0; padding: 2px 6px; border-radius: 4px;'>" + Engine.runHash + "</span>\n</div>\n";
+                    htmlDocument += "<div class='row'>\n<span class='label'>Identificación Fiscal:</span>\n<span class='value'>" + r.id + "</span>\n</div>\n";
+                    htmlDocument += "<div class='row'>\n<span class='label'>Nombre a favor de:</span>\n<span class='value'>" + r.nombre.toUpperCase() + "</span>\n</div>\n";
+                    htmlDocument += "<div class='total-box'>\n<div style='color: #059669; font-weight: bold; font-size: 12px; text-transform: uppercase;'>SUMA LÍQUIDA ACREDITADA</div>\n<div class='total-val'>Q. " + totalFormat + "</div>\n</div>\n";
+                    htmlDocument += "<div class='firma-box'>\nFirma de Conformidad del Beneficiario\n</div>\n</div>\n";
                 }
                 
-                htmlDocument += "</body>\n";
-                htmlDocument += "</html>\n";
-                
+                htmlDocument += "</body>\n</html>\n";
                 win.document.write(htmlDocument);
                 win.document.close();
-                setTimeout(function() { 
-                    win.print(); 
-                }, 1000);
+                setTimeout(function() { win.print(); }, 1000);
             },
 
             generarChequesImpresos: function() {
                 const win = window.open('', '_blank');
-                let htmlDocument = "<!DOCTYPE html>\n";
-                htmlDocument += "<html>\n";
-                htmlDocument += "<head>\n";
-                htmlDocument += "   <title>Impresión de Cheques Corporativos PayLogic</title>\n";
-                htmlDocument += "   <style>\n";
-                htmlDocument += "       body { font-family: 'Courier New', Courier, monospace; background: #e2e8f0; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center;}\n";
-                htmlDocument += "       .cheque { width: 850px; height: 360px; background: #fffdf5; margin-bottom: 40px; border: 2px solid #cbd5e1; border-left: 20px solid #cbd5e1; position: relative; overflow: hidden; page-break-after: always; box-sizing: border-box; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-radius: 4px; }\n";
-                htmlDocument += "       .wave { position: absolute; width: 200%; height: 200%; background: repeating-radial-gradient(ellipse at center, transparent, transparent 10px, rgba(148, 163, 184, 0.08) 11px, rgba(148, 163, 184, 0.08) 12px); top: -50%; left: -50%; transform: rotate(15deg); pointer-events: none; }\n";
-                htmlDocument += "       .header { position: absolute; top: 25px; left: 35px; font-family: sans-serif; }\n";
-                htmlDocument += "       .name { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: #0f172a;}\n";
-                htmlDocument += "       .sub { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 2px;}\n";
-                htmlDocument += "       .date-area { position: absolute; top: 35px; right: 45px; border-bottom: 1px solid #94a3b8; width: 180px; text-align: center; font-family: sans-serif; font-size: 14px; font-weight: bold; color: #334155; padding-bottom: 2px;}\n";
-                htmlDocument += "       .pay-to { position: absolute; top: 120px; left: 35px; font-size: 12px; font-family: sans-serif; font-weight: bold; color: #64748b;}\n";
-                htmlDocument += "       .pay-to-line { position: absolute; top: 130px; left: 160px; border-bottom: 1px solid #94a3b8; width: 450px; font-size: 20px; font-weight: bold; padding-bottom: 2px; color: #0f172a;}\n";
-                htmlDocument += "       .amount-box { position: absolute; top: 110px; right: 45px; border: 2px solid #94a3b8; width: 180px; height: 45px; font-size: 22px; font-weight: bold; display: flex; align-items: center; padding-left: 15px; background: rgba(255,255,255,0.8); border-radius: 4px; color: #0f172a;}\n";
-                htmlDocument += "       .amount-text { position: absolute; top: 180px; left: 35px; border-bottom: 1px solid #94a3b8; width: 620px; font-style: italic; font-family: sans-serif; font-size: 13px; color: #334155; padding-bottom: 2px;}\n";
-                htmlDocument += "       .bank-info { position: absolute; top: 240px; left: 35px; display: flex; align-items: center; font-family: sans-serif;}\n";
-                htmlDocument += "       .logo { width: 35px; height: 35px; background: #0f172a; display: inline-block; margin-right: 12px; border-radius: 4px;}\n";
-                htmlDocument += "       .b-text { font-size: 13px; font-weight: 800; color: #0f172a;}\n";
-                htmlDocument += "       .micr { position: absolute; bottom: 25px; left: 35px; font-size: 22px; letter-spacing: 3px; font-family: 'Courier New', monospace; font-weight: bold; color: #0f172a;}\n";
-                htmlDocument += "       .hash-tag { position: absolute; top: 10px; right: 10px; font-size: 9px; color: #94a3b8; font-family: monospace;}\n";
-                htmlDocument += "       .firma-auth { position: absolute; bottom: 80px; right: 50px; border-bottom: 1px solid #0f172a; width: 250px; text-align: center; font-size: 10px; font-family: sans-serif; color: #64748b; font-weight: bold; padding-bottom: 2px;}\n";
-                htmlDocument += "   </style>\n";
-                htmlDocument += "</head>\n";
-                htmlDocument += "<body>\n";
+                let htmlDocument = "<!DOCTYPE html>\n<html>\n<head>\n<title>Impresión de Cheques Corporativos PayLogic</title>\n";
+                htmlDocument += "<style>\nbody { font-family: 'Courier New', Courier, monospace; background: #e2e8f0; margin: 0; padding: 40px; display: flex; flex-direction: column; align-items: center;}\n";
+                htmlDocument += ".cheque { width: 850px; height: 360px; background: #fffdf5; margin-bottom: 40px; border: 2px solid #cbd5e1; border-left: 20px solid #cbd5e1; position: relative; overflow: hidden; page-break-after: always; box-sizing: border-box; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); border-radius: 4px; }\n";
+                htmlDocument += ".wave { position: absolute; width: 200%; height: 200%; background: repeating-radial-gradient(ellipse at center, transparent, transparent 10px, rgba(148, 163, 184, 0.08) 11px, rgba(148, 163, 184, 0.08) 12px); top: -50%; left: -50%; transform: rotate(15deg); pointer-events: none; }\n";
+                htmlDocument += ".header { position: absolute; top: 25px; left: 35px; font-family: sans-serif; }\n";
+                htmlDocument += ".name { font-size: 24px; font-weight: 900; letter-spacing: -0.5px; color: #0f172a;}\n";
+                htmlDocument += ".sub { font-size: 11px; color: #64748b; font-weight: 600; margin-top: 2px;}\n";
+                htmlDocument += ".date-area { position: absolute; top: 35px; right: 45px; border-bottom: 1px solid #94a3b8; width: 180px; text-align: center; font-family: sans-serif; font-size: 14px; font-weight: bold; color: #334155; padding-bottom: 2px;}\n";
+                htmlDocument += ".pay-to { position: absolute; top: 120px; left: 35px; font-size: 12px; font-family: sans-serif; font-weight: bold; color: #64748b;}\n";
+                htmlDocument += ".pay-to-line { position: absolute; top: 130px; left: 160px; border-bottom: 1px solid #94a3b8; width: 450px; font-size: 20px; font-weight: bold; padding-bottom: 2px; color: #0f172a;}\n";
+                htmlDocument += ".amount-box { position: absolute; top: 110px; right: 45px; border: 2px solid #94a3b8; width: 180px; height: 45px; font-size: 22px; font-weight: bold; display: flex; align-items: center; padding-left: 15px; background: rgba(255,255,255,0.8); border-radius: 4px; color: #0f172a;}\n";
+                htmlDocument += ".amount-text { position: absolute; top: 180px; left: 35px; border-bottom: 1px solid #94a3b8; width: 620px; font-style: italic; font-family: sans-serif; font-size: 13px; color: #334155; padding-bottom: 2px;}\n";
+                htmlDocument += ".bank-info { position: absolute; top: 240px; left: 35px; display: flex; align-items: center; font-family: sans-serif;}\n";
+                htmlDocument += ".logo { width: 35px; height: 35px; background: #0f172a; display: inline-block; margin-right: 12px; border-radius: 4px;}\n";
+                htmlDocument += ".b-text { font-size: 13px; font-weight: 800; color: #0f172a;}\n";
+                htmlDocument += ".micr { position: absolute; bottom: 25px; left: 35px; font-size: 22px; letter-spacing: 3px; font-family: 'Courier New', monospace; font-weight: bold; color: #0f172a;}\n";
+                htmlDocument += ".hash-tag { position: absolute; top: 10px; right: 10px; font-size: 9px; color: #94a3b8; font-family: monospace;}\n";
+                htmlDocument += ".firma-auth { position: absolute; bottom: 80px; right: 50px; border-bottom: 1px solid #0f172a; width: 250px; text-align: center; font-size: 10px; font-family: sans-serif; color: #64748b; font-weight: bold; padding-bottom: 2px;}\n";
+                htmlDocument += "</style>\n</head>\n<body>\n";
 
                 let dString = new Date().toLocaleDateString('es-ES');
 
@@ -1173,36 +1147,23 @@
                     let r = Engine.resultados[i];
                     let numStr = r.total.toLocaleString('es-GT', {minimumFractionDigits:2});
                     
-                    htmlDocument += "   <div class='cheque'>\n";
-                    htmlDocument += "       <div class='wave'></div>\n";
-                    htmlDocument += "       <div class='hash-tag'>Validación Sistémica: " + Engine.runHash + " | UUID: " + r.id + "</div>\n";
-                    htmlDocument += "       <div class='header'>\n";
-                    htmlDocument += "           <div class='name'>MI CORPORACIÓN S.A.</div>\n";
-                    htmlDocument += "           <div class='sub'>Dirección Comercial, Ciudad de Guatemala<br>NIT: 1234567-8</div>\n";
-                    htmlDocument += "       </div>\n";
-                    htmlDocument += "       <div class='date-area'>" + dString + "</div>\n";
-                    htmlDocument += "       <div class='pay-to'>PÁGUESE A LA<br>ORDEN DE:</div>\n";
-                    htmlDocument += "       <div class='pay-to-line'>" + r.nombre.toUpperCase() + "</div>\n";
-                    htmlDocument += "       <div class='amount-box'><span style='color: #64748b; font-size: 16px; margin-right: 8px;'>Q</span> " + numStr + "</div>\n";
-                    htmlDocument += "       <div class='amount-text'>*** CONCEPTO DE PAGO DE HONORARIOS Y/O SALARIOS PERÍODO ACTUAL ***</div>\n";
-                    htmlDocument += "       <div class='bank-info'>\n";
-                    htmlDocument += "           <div class='logo'></div>\n";
-                    htmlDocument += "           <div class='b-text'>BANCO DEL SISTEMA NACIONAL<br><span style='color:#64748b; font-size: 10px;'>Agencia Central, CA</span></div>\n";
-                    htmlDocument += "       </div>\n";
-                    htmlDocument += "       <div class='firma-auth'>Firma Autorizada PayLogic ERP</div>\n";
-                    htmlDocument += "       <div class='micr'>|: 384750291 |: 000" + (1000 + i) + "8900 ||&quot; 0" + (100+i) + "</div>\n";
-                    htmlDocument += "   </div>\n";
+                    htmlDocument += "<div class='cheque'>\n<div class='wave'></div>\n";
+                    htmlDocument += "<div class='hash-tag'>Validación Sistémica: " + Engine.runHash + " | UUID: " + r.id + "</div>\n";
+                    htmlDocument += "<div class='header'>\n<div class='name'>MI CORPORACIÓN S.A.</div>\n<div class='sub'>Dirección Comercial, Ciudad de Guatemala<br>NIT: 1234567-8</div>\n</div>\n";
+                    htmlDocument += "<div class='date-area'>" + dString + "</div>\n";
+                    htmlDocument += "<div class='pay-to'>PÁGUESE A LA<br>ORDEN DE:</div>\n<div class='pay-to-line'>" + r.nombre.toUpperCase() + "</div>\n";
+                    htmlDocument += "<div class='amount-box'><span style='color: #64748b; font-size: 16px; margin-right: 8px;'>Q</span> " + numStr + "</div>\n";
+                    htmlDocument += "<div class='amount-text'>*** CONCEPTO DE PAGO DE HONORARIOS Y/O SALARIOS PERÍODO ACTUAL ***</div>\n";
+                    htmlDocument += "<div class='bank-info'>\n<div class='logo'></div>\n<div class='b-text'>BANCO DEL SISTEMA NACIONAL<br><span style='color:#64748b; font-size: 10px;'>Agencia Central, CA</span></div>\n</div>\n";
+                    htmlDocument += "<div class='firma-auth'>Firma Autorizada PayLogic ERP</div>\n";
+                    htmlDocument += "<div class='micr'>|: 384750291 |: 000" + (1000 + i) + "8900 ||&quot; 0" + (100+i) + "</div>\n</div>\n";
                 }
                 
-                htmlDocument += "</body>\n";
-                htmlDocument += "</html>\n";
-                
+                htmlDocument += "</body>\n</html>\n";
                 win.document.write(htmlDocument);
                 win.document.close();
-                setTimeout(function() { 
-                    win.print(); 
-                }, 1000);
-            },
+                setTimeout(function() { win.print(); }, 1000);
+            }
         };
 
         // ---------------------------------------------------------
@@ -1244,16 +1205,12 @@
                     wrapperDiv.innerText = texto;
                 } else {
                     wrapperDiv.className = "fade-in chat-bubble-ai markdown-content text-sm";
-                    
-                    // Conversión Segura de Markdown a HTML
                     const rawHtml = marked.parse(texto);
-                    
                     wrapperDiv.innerHTML = "<p class='font-bold text-xs text-purple-700 mb-2 border-b border-purple-200 pb-1'><i class='fa-solid fa-robot mr-1'></i> PayLogic AI Engine</p>" + rawHtml;
                 }
                 
                 container.appendChild(wrapperDiv);
                 
-                // Asegurar que el Scroll baje suavemente al último mensaje
                 container.scrollTo({
                     top: container.scrollHeight,
                     behavior: 'smooth'
@@ -1268,16 +1225,13 @@
                     return;
                 }
 
-                // Desactivar UI temporalmente
                 inputEl.value = '';
                 inputEl.disabled = true;
                 const btnSubmit = document.getElementById('btn-send-chat');
                 if (btnSubmit) btnSubmit.disabled = true;
 
-                // 1. Mostrar Input del Usuario
                 IA.agregarMensajeUI(textoUsuario, true);
 
-                // 2. Preparar Loading State
                 const container = document.getElementById('chat-messages');
                 const loadingDiv = document.createElement('div');
                 loadingDiv.id = "chat-loading";
@@ -1288,7 +1242,6 @@
                 container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' });
 
                 try {
-                    // Petición al EndPoint de ExpresS Seguro (No se manda API key)
                     const reqOptions = {
                         method: 'POST',
                         headers: { 
@@ -1307,16 +1260,13 @@
 
                     const jsonResponse = await response.json();
                     
-                    // Remover Loading
                     const loadEl = document.getElementById('chat-loading');
                     if(loadEl) loadEl.remove();
 
-                    // Comprobar Errores de API
                     if (jsonResponse.error) {
                         Utils.showToast(jsonResponse.error, "error");
                         IA.agregarMensajeUI("⚠️ Hubo un problema con la respuesta del Servidor: " + jsonResponse.error, false);
                     } else {
-                        // 3. Imprimir Respuesta de Gemini
                         IA.agregarMensajeUI(jsonResponse.respuesta, false);
                     }
 
@@ -1328,14 +1278,10 @@
                     Utils.showToast("Corte de Conexión: Backend Apagado.", "error");
                     
                     let errorText = "❌ **Fallo de Conexión Crítico**\n\n";
-                    errorText += "No me pude conectar al archivo `server.js`. \n";
-                    errorText += "Por favor, asegúrate de haber ejecutado en la terminal el comando: \n\n";
-                    errorText += "`node server.js`";
-                    
+                    errorText += "No me pude conectar a la API. Asegúrate de tener los enlaces correctos.\n";
                     IA.agregarMensajeUI(errorText, false);
                     
                 } finally {
-                    // Reactivar UI
                     inputEl.disabled = false;
                     if (btnSubmit) btnSubmit.disabled = false;
                     inputEl.focus();
@@ -1363,6 +1309,51 @@
                     document.getElementById('section-results').classList.add('hidden');
                     document.getElementById('section-logic').classList.remove('hidden');
                     Utils.showToast("Operación contable cancelada exitosamente.", "info");
+                }
+            },
+
+            // NUEVO: Ver PINs de forma segura
+            mostrarCredenciales: function() {
+                if (Engine.resultados.length === 0) {
+                    Utils.showToast("No hay nómina procesada aún.", "error");
+                    return;
+                }
+                
+                const tbody = document.getElementById('tabla-pins-body');
+                let trHtml = "";
+                
+                for(let i=0; i<Engine.resultados.length; i++) {
+                    let r = Engine.resultados[i];
+                    trHtml += "<tr>";
+                    trHtml += "<td class='px-4 py-3 border-b border-slate-100 font-bold'>" + r.id + "</td>";
+                    trHtml += "<td class='px-4 py-3 border-b border-slate-100'>" + r.nombre + "</td>";
+                    trHtml += "<td class='px-4 py-3 border-b border-slate-100 text-center'><span class='bg-slate-200 text-slate-800 font-bold px-2 py-1 rounded tracking-widest'>" + r.pin + "</span></td>";
+                    trHtml += "</tr>";
+                }
+                
+                tbody.innerHTML = trHtml;
+                
+                document.getElementById('modal-credenciales').classList.remove('hidden');
+                setTimeout(function() { 
+                    document.getElementById('modal-credenciales').classList.remove('opacity-0'); 
+                }, 10);
+            },
+            
+            cerrarCredenciales: function() {
+                document.getElementById('modal-credenciales').classList.add('opacity-0');
+                setTimeout(function() { 
+                    document.getElementById('modal-credenciales').classList.add('hidden'); 
+                }, 300);
+            },
+
+            // NUEVO: Enviar a Finanzas
+            enviarAFinanzas: function() {
+                if (Engine.resultados.length === 0) return;
+                
+                const conf = confirm("¿Confirmas que la nómina ha sido validada y está lista para enviarse a Tesorería para su desembolso final?");
+                if(conf) {
+                    Utils.showToast("Lote bloqueado y transferido a la bandeja de Tesorería exitosamente.", "success");
+                    // Aquí en el futuro se llamaría a otro endpoint como /api/nomina/finalizar
                 }
             },
 
@@ -1399,16 +1390,10 @@
                 
                 for(let i=1; i<=25; i++) {
                     let t = tipos[Math.floor(Math.random() * tipos.length)];
-                    
-                    // Fórmula de Random Base Salarial
                     let randBase = Math.random() * (8500 - 3500 + 1) + 3500;
                     let baseFormateada = Math.round(Math.floor(randBase) / 100) * 100;
-                    
-                    // Fórmula de Comisiones Aleatorias
                     let randVentas = Math.random() * 12000;
                     let ventasFormateadas = Math.round(Math.floor(randVentas) / 50) * 50;
-                    
-                    // Fórmula de Horas (Solo para algunos)
                     let hExtra = (Math.random() > 0.4) ? Math.floor(Math.random() * 15) : 0;
 
                     Engine.empleados.push({
@@ -1487,7 +1472,6 @@
                     const lines = text.split(/\r?\n/);
                     const arrayNuevos = [];
                     
-                    // Saltamos la fila cero (Cabeceras)
                     for(let i = 1; i < lines.length; i++) {
                         const line = lines[i].trim();
                         
