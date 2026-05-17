@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal del Empleado | PayLogic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        /* Toast Alerts */
+        #toast-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { padding: 15px 20px; border-radius: 8px; color: white; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.1); opacity: 0; transform: translateX(100%); transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; }
+        .toast.show { opacity: 1; transform: translateX(0); }
+        .toast-error { background-color: #ef4444; }
+        .toast-success { background-color: #10b981; }
+    </style>
+</head>
+<body class="bg-slate-100 h-screen w-full flex flex-col font-sans text-slate-800">
+
+    <div id="toast-container"></div>
+
+    <header class="h-16 bg-white shadow-sm border-b border-slate-200 flex items-center px-6 z-10 w-full justify-center">
+        <h2 class="text-xl font-black text-slate-800 tracking-tight">
+            <i class="fa-solid fa-user-shield text-blue-600 mr-2"></i> Mi Portal de Pagos PayLogic
+        </h2>
+    </header>
+
+    <div class="flex-1 flex items-center justify-center p-4 relative">
+        
+        <div id="portal-login" class="bg-white p-10 rounded-3xl shadow-xl border border-slate-200 w-full max-w-md text-center fade-in">
+            <div class="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fa-solid fa-fingerprint text-4xl text-blue-600"></i>
+            </div>
+            <h3 class="text-2xl font-black text-slate-800 mb-2">Acceso Seguro</h3>
+            <p class="text-sm text-slate-500 mb-6">Ingresa las credenciales proporcionadas por RRHH.</p>
+            
+            <input type="text" id="portal-id" placeholder="ID Empleado (Ej. EMP-001)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 mb-4 font-mono outline-none focus:border-blue-500 text-center uppercase">
+            <input type="password" id="portal-pin" placeholder="PIN Secreto de Boleta" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 mb-6 font-mono outline-none focus:border-blue-500 text-center tracking-widest">
+            
+            <button onclick="iniciarSesion()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black py-3 rounded-xl transition-all shadow-lg">
+                Autenticar y Ver Recibo
+            </button>
+        </div>
+
+        <div id="portal-dashboard" class="hidden bg-white p-8 rounded-3xl shadow-xl border border-slate-200 w-full max-w-3xl fade-in text-left relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-bl-full z-0"></div>
+            
+            <div class="relative z-10 flex justify-between items-start border-b border-slate-100 pb-6 mb-6">
+                <div>
+                    <p class="text-xs font-bold text-blue-600 uppercase tracking-widest mb-1">Recibo de Pago de Nómina</p>
+                    <h3 class="text-3xl font-black text-slate-800" id="portal-emp-nombre">Cargando...</h3>
+                    <p class="text-sm text-slate-500 font-mono mt-1" id="portal-emp-id"></p>
+                </div>
+                <button onclick="cerrarSesion()" class="text-sm font-bold text-slate-400 hover:text-red-500 transition-colors">Cerrar Sesión</button>
+            </div>
+
+            <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div>
+                    <h4 class="font-black text-slate-700 mb-4 border-b border-slate-200 pb-2">Resumen Financiero</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-slate-500">Salario Ordinario</span><span class="font-bold text-slate-800" id="p-salario"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Devengos Extras</span><span class="font-bold text-blue-600" id="p-extras"></span></div>
+                        <div class="flex justify-between"><span class="text-slate-500">Deducciones</span><span class="font-bold text-red-500" id="p-igss"></span></div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 flex flex-col justify-center text-center">
+                    <p class="text-sm font-bold text-slate-500 uppercase tracking-widest mb-2">Líquido a Depositar</p>
+                    <h2 class="text-5xl font-black text-emerald-600 mb-4" id="p-total">Q. 0.00</h2>
+                    
+                    <div id="p-timer" class="mb-4"></div>
+
+                    <button id="btn-aprobar-portal" onclick="firmarRecibo()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-black py-4 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
+                        Aprobar y Firmar Conformidad
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = "http://localhost:3000/api";
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type === 'error' ? 'toast-error' : 'toast-success'}`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'error' ? 'fa-circle-exclamation' : 'fa-circle-check'}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        async function iniciarSesion() {
+            const id = document.getElementById('portal-id').value.trim().toUpperCase();
+            const pin = document.getElementById('portal-pin').value.trim();
+
+            if(!id || !pin) return showToast("Ingresa tus credenciales.", "error");
+
+            try {
+                // Consultar a la API del Backend en lugar de buscar en memoria
+                const response = await fetch(`${API_URL}/empleado/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, pin })
+                });
+
+                if (!response.ok) {
+                    throw new Error("Credenciales inválidas");
+                }
+
+                const data = await response.json();
+                const emp = data.empleado;
+
+                // Llenar Dashboard
+                document.getElementById('portal-emp-nombre').innerText = emp.nombre;
+                document.getElementById('portal-emp-id').innerText = emp.id;
+                document.getElementById('p-salario').innerText = "Q. " + emp.salario.toLocaleString('es-GT', {minimumFractionDigits:2});
+                document.getElementById('p-extras').innerText = "+Q. " + emp.bonos.toLocaleString('es-GT', {minimumFractionDigits:2});
+                document.getElementById('p-igss').innerText = "-Q. " + emp.deducciones.toLocaleString('es-GT', {minimumFractionDigits:2});
+                document.getElementById('p-total').innerText = "Q. " + emp.total.toLocaleString('es-GT', {minimumFractionDigits:2});
+
+                const btn = document.getElementById('btn-aprobar-portal');
+                const timer = document.getElementById('p-timer');
+
+                if(emp.status === 'FIRMADO') {
+                    timer.className = "bg-emerald-100 text-emerald-800 p-3 rounded-xl text-xs font-bold";
+                    timer.innerHTML = "<i class='fa-solid fa-check mr-1'></i> Recibo firmado y procesado.";
+                    btn.style.display = 'none';
+                } else {
+                    timer.className = "bg-amber-100 text-amber-800 p-3 rounded-xl text-xs font-bold";
+                    timer.innerHTML = "<i class='fa-regular fa-clock mr-1'></i> Tienes 3 días para revisar este documento.";
+                    btn.style.display = 'block';
+                }
+
+                document.getElementById('portal-login').classList.add('hidden');
+                document.getElementById('portal-dashboard').classList.remove('hidden');
+
+            } catch (error) {
+                showToast("Acceso denegado. Verifica tu PIN con RRHH.", "error");
+            }
+        }
+
+        async function firmarRecibo() {
+            const id = document.getElementById('portal-id').value.trim().toUpperCase();
+            const pin = document.getElementById('portal-pin').value.trim();
+
+            try {
+                const response = await fetch(`${API_URL}/empleado/firmar`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, pin })
+                });
+
+                if (!response.ok) throw new Error("Error al firmar");
+
+                showToast("¡Recibo firmado con éxito!");
+                
+                // Actualizar UI localmente
+                document.getElementById('btn-aprobar-portal').style.display = 'none';
+                const timer = document.getElementById('p-timer');
+                timer.className = "bg-emerald-100 text-emerald-800 p-3 rounded-xl text-xs font-bold";
+                timer.innerHTML = "<i class='fa-solid fa-check mr-1'></i> Recibo firmado y procesado.";
+
+            } catch (error) {
+                showToast("Hubo un error al procesar tu firma.", "error");
+            }
+        }
+
+        function cerrarSesion() {
+            document.getElementById('portal-id').value = '';
+            document.getElementById('portal-pin').value = '';
+            document.getElementById('portal-dashboard').classList.add('hidden');
+            document.getElementById('portal-login').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
