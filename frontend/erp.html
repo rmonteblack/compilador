@@ -620,7 +620,7 @@
     <script>
         
         // La URL de tu backend express que contiene las rutas de API
-        const API_URL = "https://compiladorpaylogic.onrender.com//api";
+        const API_URL = "https://compiladorpaylogic.onrender.com/api";
 
         // ---------------------------------------------------------
         // 1. UTILIDADES Y MATEMÁTICA BANCARIA
@@ -1190,7 +1190,7 @@
                     htmlDocument += "           <div class='b-text'>BANCO DEL SISTEMA NACIONAL<br><span style='color:#64748b; font-size: 10px;'>Agencia Central, CA</span></div>\n";
                     htmlDocument += "       </div>\n";
                     htmlDocument += "       <div class='firma-auth'>Firma Autorizada PayLogic ERP</div>\n";
-                    htmlDocument += "       <div class='micr'>|: 384750291 |: 000" + (1000 + i) + "8900 ||\" 0" + (100+i) + "</div>\n";
+                    htmlDocument += "       <div class='micr'>|: 384750291 |: 000" + (1000 + i) + "8900 ||&quot; 0" + (100+i) + "</div>\n";
                     htmlDocument += "   </div>\n";
                 }
                 
@@ -1202,7 +1202,7 @@
                 setTimeout(function() { 
                     win.print(); 
                 }, 1000);
-            }
+            },
         };
 
         // ---------------------------------------------------------
